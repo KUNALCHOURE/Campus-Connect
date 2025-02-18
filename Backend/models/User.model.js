@@ -19,6 +19,7 @@ const Userschema=new mongoose.Schema({
     },
     profileimage:{
         type:String,
+        default:"",
         required:[true,"password is required"],
 
     }
@@ -34,5 +35,43 @@ Userschema.pre('save',async function(next) {
     
 })
 
+
+
+Userschema.methods.generateaccestoken=async function () {
+    return jwt.sign(
+        {
+            _id:_id,
+            email:this.email,
+            username:this.username,
+
+        }
+        ,
+        process.env.ACCESS_TOKEN_SECRET,
+        {
+            expiresIn:process.env.ACCESS_TOKEN_EXPIRY
+        },
+
+    )
+
+    
+}
+
+
+Userschema.methods.generatErefreshtoken=async function () {
+    return jwt.sign(
+        {
+            _id:_id,
+        
+        }
+        ,
+        process.env.REFRESH_TOKEN_SECRET,
+        {
+            expiresIn:process.env.REFRESH_TOKEN_EXPIRY
+        },
+        
+    )
+
+    
+}
 const user=new mongoose.model('user',Userschema);
 export {user};
