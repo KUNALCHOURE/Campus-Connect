@@ -1,6 +1,7 @@
 import {user} from "../models/User.model"
 import Apierror from "../utils/Apierror";
 import jwt from "jsonwebtoken";
+import asynchandler from "../utils/asynchandler";
 
 const generatetokens=async(userid)=>{
   try{
@@ -51,7 +52,7 @@ return res.status(200).json(new Apiresponse(200,"User Registered Succesfully"));
 
 }
 
-const login=async ()=>{
+const login=asynchandler(async ()=>{
   let{username,password}=req.body;
 
   if(!(username && password)){
@@ -86,8 +87,74 @@ const login=async ()=>{
     },"User Logged in Successfully "))
 
 
-} 
+}
+) 
+
+const logout=asynchandler(async(req,res)=>{
+    
+  let userid= req.user._id
+ await user.findByIdAndUpdate(userid,{
+      $set:{
+         refreshtoken:undefined,
+       }
+      },
+      {
+        new:true
+      }
+      )
+ 
+    const options={   
+     httpOnly:true,
+    secure:true
+    }
+ 
+       return res
+      .status(200)  
+      .clearCookie("accesstoken",options)
+      .clearCookie("refreshtoken",options)
+      .json(new Apiresponse(200,{},"userlogged out"));
+ 
+ 
+ })
+
+ const getuserinfo=async(req,res)=>{
+  let userinfo=req.user;
+
+  return res.status(200)
+  .json(new Apiresponse(200,{userinfo},"The user successfully found "));
+ }
+ 
 
 
 
-export default {register,login};
+ const changepassword=asynchandler(async(req,res)=>{
+
+    const{oldpassword,newpassword}=req.body;
+
+    if(!(oldpassword && newpassword)){
+      throw new Apierror(400,"please give all credentials");
+
+    }
+
+    let userinfo=await user.findById(req.user?._id);
+    if(!userinfo){
+      throw new Apierror(400,"Problem occured on finding user");
+
+    }
+
+     if(!(await userinfo.ispasswordcorrect(oldpassword))){
+      throw new Apierror(401,"Plese enter correct old password ");
+ 
+     }
+     userinfo.password=newpassword;
+
+     await userinfo.save({validateBeforeSave:false});
+   
+   return res.status(200)
+   .json(
+    new Apiresponse(200,{},"password changed")
+   )
+
+ })
+
+export default {register,login,logout,getuserinfo,changepassword};
