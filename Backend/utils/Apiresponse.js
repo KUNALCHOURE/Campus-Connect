@@ -6,3 +6,4 @@ class Apiresponse{
         
     }
 }
+export default Apiresponse;

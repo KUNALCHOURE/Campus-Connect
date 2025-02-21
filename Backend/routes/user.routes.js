@@ -1,4 +1,4 @@
-import { user } from "../models/User.model";
+
 import { Router } from "express";
 import {register,login,logout} from '../controllers/user.controllers.js';
 import { verifyjwt } from "../middlewares/authmiddleware.js";
