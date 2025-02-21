@@ -6,14 +6,14 @@ import asynchandler from "../utils/asynchandler.js";
 const generatetokens=async(userid)=>{
   try{
       
-    let userinfo = await user.findById(userid).select("_id");
-
+    let userinfo = await user.findById(userid).select("-password -refreshtoken");
+ 
     if (!userinfo) {
         throw new Apierror(405, "User not found, cannot generate tokens");
     }
-      const accestoken=await userinfo.generateaccestoken();
-      const refreshtoken=await userinfo.generaterefreshtoken();
-
+      const accestoken=await userinfo.generateAcessToken();
+      const refreshtoken=await userinfo.generateRefreshToken();
+      console.log(accestoken);
       return {accestoken,refreshtoken};
   }
   catch(e){
@@ -66,8 +66,8 @@ const login=asynchandler(async (req,res)=>{
   if(!(await logginguser.ispasswordcorrect(password))){
     throw new Apierror(400,"Incorrect password ")
   }
-
-  const {accestoken,refreshtoken}=generatetokens(logginguser._id);
+ console.log(logginguser._id);
+  const {accestoken,refreshtoken}=await generatetokens(logginguser._id);
 
   const loggedinuser = await user.findById(logginguser._id).select("-password -refreshtoken").lean();
 
@@ -93,6 +93,7 @@ const login=asynchandler(async (req,res)=>{
 const logout=asynchandler(async(req,res)=>{
     
   let userid= req.user._id
+  console.log(user._id);
  await user.findByIdAndUpdate(userid,{
       $set:{
          refreshtoken:undefined,

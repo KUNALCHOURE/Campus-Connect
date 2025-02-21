@@ -6,20 +6,21 @@ import asynchandler from "../utils/asynchandler.js";
 const verifyjwt =asynchandler(async(req,_,next)=>{
 try{
     const token=req.cookies?.accesstoken ||req.header("Authorization")?.replace("Bearer ","");
-    
+
     if(!token){
         throw new Apierror(401,"Token is missing");
 
     }
     
-    const decodeduser=jwt.verify(token,process.env.ACCESS_TOKEN_SECRET)
+    const decodeduser= jwt.verify(token,process.env.ACCESS_TOKEN_SECRET)
 
     if(!decodeduser){
         throw new Apierror(401,"Unauthorised access");
 
     }
-
-    const userdata=await user.findById(decodeduser._id).select("-password -refreshtoken");
+    // console.log("decoded id",decodeduser._id);
+    
+    const userdata=await user.findById(decodeduser?._id).select("-password -refreshtoken");
 
 
      if(!userdata){
