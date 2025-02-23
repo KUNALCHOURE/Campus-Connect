@@ -1,13 +1,12 @@
 import mongoose from "mongoose";
-import { post, post, post } from "../models/Post.model";
-import asynchandler from "../utils/asynchandler";
-import Apierror from "../utils/Apierror";
-import { user } from "../models/User.model";
-import Apiresponse from "../utils/Apiresponse";
+import {post} from "../models/Post.model.js";
+import asynchandler from "../utils/asynchandler.js";
+import Apierror from "../utils/Apierror.js";
+import Apiresponse from "../utils/Apiresponse.js";
 
 const createpost=asynchandler(async(req,res)=>{
     const{title,content,tags}=req.body;
-   
+   console.log(req.user);
     if(!mongoose.Types.ObjectId.isValid(req.user._id)){
         throw new Apierror(400,"Invalid user ID");
     }
@@ -26,7 +25,7 @@ const createpost=asynchandler(async(req,res)=>{
      })
 
      return res.status(200)
-     .json(201,newpost,"Post created Successfully");
+     .json(new Apiresponse(201,newpost,"Post created Successfully"));
 
 
 });
@@ -34,12 +33,12 @@ const createpost=asynchandler(async(req,res)=>{
 const getpost=asynchandler(async(req,res)=>{
      const posts=await post.find().populate('createdBy.id','username').sort({ createdAt: -1 });
 
-     if(!posts?.lenght){
-        throw new Apierror(400,"post not found");
-     }
+     if (!posts || posts.length === 0) {
+        throw new Apierror(400, "No posts found");
+    }
      return res.status(200)
      .json(
-         new ApiResponse(
+         new Apiresponse(
              200,
              posts,
              "Posts fetched successfully"
@@ -48,8 +47,8 @@ const getpost=asynchandler(async(req,res)=>{
 })
 
 const likepost=asynchandler(async(req,res)=>{
-    const postid=req.body;
-
+    const {postid}=req.body;
+console.log(postid);
     if(!mongoose.Types.ObjectId.isValid(postid)){
         throw new Apierror(400,"Invalid post id ");
 
@@ -60,9 +59,10 @@ const likepost=asynchandler(async(req,res)=>{
         throw new Apierror(404,"Unable to fing the post");
     }
      const currentuser=req.user;
-    if(!currentuser.likepost.includes(postid)){
+     console.log(currentuser);
+    if(!currentuser.likedPosts.includes(postid)){
         currentpost.likes+=1;
-        currentuser.likepost.push(postid);
+        currentuser.likedPosts.push(postid);
 
     }
     else{
