@@ -11,8 +11,13 @@ app.use(express.urlencoded({extended:true}))
 app.use(express.static("public"))
 
 import userrouter from './routes/user.routes.js';
+import postrouter from './routes/post.routes.js';
+
 
 app.use("/api/v1/user",userrouter);
+app.use("/api/v1/post",postrouter);
+
+
 
 
 

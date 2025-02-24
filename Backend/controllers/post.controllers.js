@@ -77,4 +77,59 @@ console.log(postid);
     
 })
 
-export {createpost,getpost,likepost};
+
+const addcomment=asynchandler(async(req,res)=>{
+     const {postid}=req.params;
+     const {text}=req.body;
+     if (!mongoose.Types.ObjectId.isValid(postid)) {
+        return new Apierror(400,"Invalid id ");
+        }
+      const currentpost=await post.findById({postid});
+
+      if(!currentpost){
+        throw new Apierror(404,"error occured while finding the post");
+
+      }
+  const createdby={
+   id:req.user._id,
+   username:req.user.username
+  }
+      const newcomment={
+         text,
+         createdby,
+      };
+
+      post.comments.push(newcomment);
+      await post.save();
+      
+      return res.status(200)
+      .json(200,{},"Comment successfully added");
+
+ 
+})
+
+
+
+const getcomment=asynchandler(async(req,res)=>{
+    const {postid}=req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(postid)) {
+    return new Apierror(400,"Invalid id ");
+    }
+
+     const currentpost=await post.findById({postid});
+
+     if(!currentpost){
+       throw new Apierror(404,"error occured while finding the post");
+
+     }
+     const result=currentpost.comments;
+
+     return res.status(200)
+     .json(200,{result},"Comment successfully added");
+
+
+})
+
+
+export {createpost,getpost,likepost,addcomment,getcomment};
