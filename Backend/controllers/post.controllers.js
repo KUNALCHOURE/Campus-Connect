@@ -84,7 +84,7 @@ const addcomment=asynchandler(async(req,res)=>{
      if (!mongoose.Types.ObjectId.isValid(postid)) {
         return new Apierror(400,"Invalid id ");
         }
-      const currentpost=await post.findById({postid});
+      const currentpost=await post.findById(postid);
 
       if(!currentpost){
         throw new Apierror(404,"error occured while finding the post");
@@ -99,11 +99,11 @@ const addcomment=asynchandler(async(req,res)=>{
          createdby,
       };
 
-      post.comments.push(newcomment);
-      await post.save();
+      currentpost.comments.push(newcomment);
+      await currentpost.save();
       
       return res.status(200)
-      .json(200,{},"Comment successfully added");
+      .json(new Apiresponse(200,{},"Comment successfully added"));
 
  
 })
@@ -117,7 +117,7 @@ const getcomment=asynchandler(async(req,res)=>{
     return new Apierror(400,"Invalid id ");
     }
 
-     const currentpost=await post.findById({postid});
+     const currentpost=await post.findById(postid);
 
      if(!currentpost){
        throw new Apierror(404,"error occured while finding the post");
@@ -126,7 +126,7 @@ const getcomment=asynchandler(async(req,res)=>{
      const result=currentpost.comments;
 
      return res.status(200)
-     .json(200,{result},"Comment successfully added");
+     .json(new Apiresponse(200,{result},"Comments successfully sended"));
 
 
 })

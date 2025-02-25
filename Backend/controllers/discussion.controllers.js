@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import  {discussion} from '../models/Discussion.model.js';
 import Apierror from '../utils/Apierror.js';
 import Apiresponse from '../utils/Apiresponse.js';
@@ -39,7 +40,7 @@ const getdiscussion=asynchandler(async(req,res)=>{
 
     }
    
-    return res.status(404)
+    return res.status(200)
     .json(new Apiresponse(200,{alldiscussions},"All discussions sended"));
 
 })
@@ -48,6 +49,10 @@ const getdiscussion=asynchandler(async(req,res)=>{
 const addcomment=asynchandler(async(req,res)=>{
     const {discussionid}=req.params;
     const{text}=req.body;
+
+     if(!mongoose.Types.ObjectId.isValid(discussionid)){
+        throw new Apierror(404,"invalid id ");
+     }
 
     const currentdiscussion=await discussion.findById(discussionid);
    
@@ -67,7 +72,7 @@ const addcomment=asynchandler(async(req,res)=>{
    }
    
    await currentdiscussion.comments.push(newcomments);
-
+    await currentdiscussion.save();
    return res.status(200)
    .json(new Apiresponse(200,{},"Comment added successfully"));
 
