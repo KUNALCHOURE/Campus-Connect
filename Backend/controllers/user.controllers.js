@@ -78,13 +78,22 @@ const login=asynchandler(async (req,res)=>{
  }
 
 
-  return res.status(200)
-  .cookie("accesstoken",accestoken,options)
-  .cookie("refreshtoken",refreshtoken,options)
-  .json(new Apiresponse(200,
-    {
-        user:loggedinuser,accestoken,refreshtoken
-    },"User Logged in Successfully "))
+ res.cookie("accessToken", accesstoken, {
+  httpOnly: true,
+  secure: true,  // ✅ Always true for production
+  sameSite: "None",  // ✅ Required for cross-origin requests
+  path: "/",
+});
+
+res.cookie("refreshToken", refreshtoken, {
+  httpOnly: true,
+  secure: true,
+  sameSite: "None",
+  path: "/",
+});
+
+
+return res.status(200).json(new Apiresponse(200, { user: loggedinuser, accesstoken, refreshtoken }, "User logged in successfully"));
 
 
 }
