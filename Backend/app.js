@@ -4,11 +4,19 @@ import cookieParser from 'cookie-parser';
 const app=express();
 
 
-app.use(cors());
+
 app.use(cookieParser());
 app.use(express.json({limit:"16kb"}));
 app.use(express.urlencoded({extended:true}))
 app.use(express.static("public"))
+
+
+
+app.use(cors({
+    origin: "http://localhost:5173",  // Allow Vite frontend
+    credentials: true                 // Allow cookies/tokens
+  }));
+
 
 import userrouter from './routes/user.routes.js';
 import postrouter from './routes/post.routes.js';
