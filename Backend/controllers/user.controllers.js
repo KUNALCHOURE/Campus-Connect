@@ -21,16 +21,17 @@ const generatetokens=async(userid)=>{
   }
   
 }
-const register=async(req,res)=>{
-
-    let{username,email,password}=req.body;
+const register=asynchandler(async(req,res)=>{
+console.log("inside backeend register ")
+  let { username, email, password, preferences } = req.body;
 
     if (!username || !email || !password) {
       throw new Apierror(400, "please provide all details");
   }
-    let existeduser=await user.findOne({
-        $or:[{username},{email}]
-    })
+  let existeduser = await user.findOne({
+    $or: [{ username: username }, { email: email }]
+});
+
     
     if(existeduser){
         throw new Apierror(400,"User already registered ")
@@ -39,19 +40,48 @@ const register=async(req,res)=>{
     const usersave =await user.create({
         username,
         email,
-        password
+        password,
+        preferences: preferences || []
     })
 
-    const createduser=await user.findOne(usersave._id).select("-password -profileimage");
+    const createduser = await user.findById(usersave._id).select("-password -profileimage");
 
 if(!createduser){
     throw new Apierror(400,"Error occured while registering user");
 }
-return res.status(200).json(new Apiresponse(200,"User Registered Succesfully"));
 
+console.log("Generating tokens...");
+    
+  // Generate tokens with role included
+  const { accesstoken, refreshtoken } = await generateAccessandrefreshtoken(usersave._id);
 
+  // Set tokens in HTTP-only cookies
+  const options = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+  };
+
+  console.log("Register complete - sending response");
+    
+  // Return user data + tokens
+  return res.status(201)
+    .cookie("accesstoken", accesstoken, options)
+    .cookie("refreshtoken", refreshtoken, options)
+    .json(new Apiresponse(
+      200, 
+      { 
+        user: {
+          ...createduser.toObject(),
+          role: createduser.role  // Explicitly include role in response
+        }, 
+        accesstoken, 
+        refreshtoken 
+      }, 
+      "User registered successfully"
+    ));
 }
-
+);
 const login=asynchandler(async (req,res)=>{
   let{username,password}=req.body;
 
@@ -78,14 +108,14 @@ const login=asynchandler(async (req,res)=>{
  }
 
 
- res.cookie("accessToken", accesstoken, {
+ res.cookie("accesstoken", accestoken, {
   httpOnly: true,
   secure: true,  // ✅ Always true for production
   sameSite: "None",  // ✅ Required for cross-origin requests
   path: "/",
 });
 
-res.cookie("refreshToken", refreshtoken, {
+res.cookie("refreshtoken", refreshtoken, {
   httpOnly: true,
   secure: true,
   sameSite: "None",
@@ -93,7 +123,7 @@ res.cookie("refreshToken", refreshtoken, {
 });
 
 
-return res.status(200).json(new Apiresponse(200, { user: loggedinuser, accesstoken, refreshtoken }, "User logged in successfully"));
+return res.status(200).json(new Apiresponse(200, { user: loggedinuser, accestoken, refreshtoken }, "User logged in successfully"));
 
 
 }
