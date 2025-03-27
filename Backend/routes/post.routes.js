@@ -9,7 +9,7 @@ router.route('/create-post').post(verifyjwt,createpost);
 router.route('/getpost').get(verifyjwt,getpost);
 router.route('/likepost').post(verifyjwt,likepost);
 router.route('/unlikepost').post(verifyjwt,unlikepost);
-router.route('/:postid/addcomment').post(verifyjwt,addcomment);
+router.route('/:postId/addcomment').post(verifyjwt,addcomment);
 router.route('/:postid/getcomment').get(verifyjwt,getcomment);
 
 

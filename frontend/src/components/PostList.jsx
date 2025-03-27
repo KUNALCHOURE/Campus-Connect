@@ -16,7 +16,7 @@ function PostList({ selectedTab }) {
            console.log(result.data.data);
            setPosts(result.data.data);
            console.log(result.data.data.comments);
-
+            console.log(posts)
            if(result){
             setIsLoading(false);
            }

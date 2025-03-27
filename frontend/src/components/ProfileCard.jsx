@@ -2,8 +2,9 @@ import React from "react";
 import { motion } from "framer-motion";
 import photo from ".././assets/vhjkl.jpeg";
 import coverimage from "../assets/coverimage.jpg";
-
+import { useAuth } from "../utils/autcontext";
 function ProfileCard() {
+  let{user}=useAuth();
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -67,7 +68,7 @@ function ProfileCard() {
           transition={{ delay: 0.4 }}
           className="text-xl font-semibold gradient-text"
         >
-          Sample User
+          {user.username}
         </motion.h2>
         
         <motion.p 

@@ -12,14 +12,14 @@ const createpost=asynchandler(async(req,res)=>{
     }
 
     const createdBy = {
-        id: req.user.id,
+        id: req.user._id,
         username: req.user.username
     };
 
      const newpost =await post.create({
         title,
         content,
-        tags,
+        tags: tags.split(",").map(tag => tag.trim()),
         createdBy
 
      })
@@ -107,18 +107,26 @@ const unlikepost=asynchandler(async(req,res)=>{
 
 
 const addcomment=asynchandler(async(req,res)=>{
-     const {postid}=req.params;
+    console.log("hello form  controller");
+     const {postId}=req.params;
+     console.log(postId)
      const {text}=req.body;
-     if (!mongoose.Types.ObjectId.isValid(postid)) {
+     console.log("hello 2");
+     if (!mongoose.Types.ObjectId.isValid(postId)) {
         return new Apierror(400,"Invalid id ");
         }
-      const currentpost=await post.findById(postid);
-
+        console.log("hello");
+      const currentpost=await post.findById(postId);
+      console.log(currentpost);
       if(!currentpost){
         throw new Apierror(404,"error occured while finding the post");
 
       }
+      console.log(req.user);
+      console.log(req.user.username);
+
   const createdby={
+
    id:req.user._id,
    username:req.user.username
   }
@@ -127,7 +135,7 @@ const addcomment=asynchandler(async(req,res)=>{
          createdby,
       };
 
-      currentpost.comments.push(newcomment);
+      await currentpost.comments.push(newcomment);
       await currentpost.save();
       
       return res.status(200)

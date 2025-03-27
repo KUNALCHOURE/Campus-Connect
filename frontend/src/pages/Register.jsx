@@ -1,17 +1,20 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import authService from "../services/authservice";
+import { Link } from "react-router-dom";
+import { useAuth } from "../utils/autcontext";
 
 function SimpleHeader() {
   return (
     <header className="text-primary-color p-4 flex justify-between items-center bg-secondary shadow-md fixed top-0 left-0 w-full z-10">
+     <Link to={'/'}>
       <div className="flex items-center space-x-4">
         <img src="/logo.jpg" alt="Logo" className="h-10 rounded-full" />
         <h1 className="text-2xl font-bold text-accent">
           Campus <span className="text-white">Connect</span>
         </h1>
       </div>
+      </Link>
     </header>
   );
 }
@@ -24,6 +27,7 @@ const topics = [
 ];
 
 function Register() {
+  let { setUser } = useAuth();
   const [email, setEmailId] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -44,21 +48,29 @@ function Register() {
     setError("");
 
     if (!username || !password) {
-      setError("Both fields are required.");
-      return;
+        setError("Both fields are required.");
+        return;
     }
 
     try {
-      await authService.register({ email, username, password, preferences: selectedTopics });
-      navigate("/");
+        const response = await authService.register({ 
+            email, 
+            username, 
+            password, 
+            preferences: selectedTopics 
+        });
 
-      // await axios.post("http://localhost:3000/api/v1/user/register", 
-      //   { email, username, password, preferences: selectedTopics }, 
-      //   { withCredentials: true }  // Required for cookies or JWT
-      // );
-      
+        console.log("Register API Response:", response.data);
+
+        if (response.data.user) {
+            setUser(response.data.user);
+            navigate("/home");
+        } else {
+            throw new Error("Invalid server response.");
+        }
+
     } catch (error) {
-      setError(error.message || "Registration failed. Please try again.");
+        setError(error.message || "Registration failed. Please try again.");
     }
   };
 

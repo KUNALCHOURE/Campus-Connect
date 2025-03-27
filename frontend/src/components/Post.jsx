@@ -5,9 +5,11 @@ import { IoTimeOutline, IoSend, IoEllipsisHorizontal } from "react-icons/io5";
 import { motion, AnimatePresence } from "framer-motion";
 
 import api from "../services/api";
+import { post } from "../../../Backend/models/Post.model";
+import { useAuth } from "../utils/autcontext";
 
 function Post({ postId, avatar, createdBy, title, content, likes, comments: initialComments, createdAt,addCommentToPost }) {
-  const [user, setUser] = useState({ username: createdBy.username });
+  const{user}=useAuth();
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(likes);
   const [comments, setComments] = useState(initialComments);
@@ -62,12 +64,10 @@ function Post({ postId, avatar, createdBy, title, content, likes, comments: init
 
   useEffect(() => {
     // Check if the post is already liked by the user
-    const userProfile = JSON.parse(localStorage.getItem("userProfile"));
-    const likedPosts = userProfile?.likedPosts || [];
-    if (likedPosts.includes(postId)) {
-      setIsLiked(true);
+    if (user && user.likedPosts) {
+      setIsLiked(user.likedPosts.includes(postId));
     }
-  }, [postId]);
+  }, [user, postId]);
 
   // Function to handle the like button click
   const handleLike = async () => {
@@ -105,28 +105,37 @@ function Post({ postId, avatar, createdBy, title, content, likes, comments: init
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!commentText.trim()) return;
+
+    if (!user || !user.username) {
+      console.error("User is not logged in or username is missing");
+      return;
+    }
+
     const newComment = {
       text: commentText,
-      createdBy: { username: createdBy.username }, // Assuming you have the username
+      createdBy: { username: user.username }, // Use the current user's username
       createdAt: new Date().toISOString(),
     };
+
     try {
-        let response=await api.post("/post/comment",{postid:postId,text:commentText})
-  
-      if(response.status!=200) {
-        throw error("error occured while commenting on the post ")
+      let response = await api.post(`/post/${postId}/addcomment`, { text: commentText });
+
+      if (response.status !== 200) {
+        throw new Error("Error occurred while commenting on the post");
       }
-     
-      
+
+      // Update the comments state locally
+      setComments((prevComments) => [...prevComments, newComment]);
+      // Update the parent component's state
+      addCommentToPost(postId, newComment);
+
       setCommentText("");
       setSubmittingComment(false);
-
     } catch (error) {
       console.error("Error posting the comment:", error.response ? error.response.data : error.message);
       setSubmittingComment(false);
     }
   };
-
 
 
   return (
