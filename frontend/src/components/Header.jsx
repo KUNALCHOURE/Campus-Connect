@@ -21,6 +21,7 @@ function Header() {
   const handlelogout = async () => {
     try {
       await logout(); // Ensures the user is logged out properly
+      console.log("navigating");
       navigate("/"); // Redirect after logout
     } catch (error) {
       console.error("Logout failed:", error);

@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import api from "../services/api";
 
-function Post({ postId, avatar, createdBy, title, content, likes, comments: initialComments, createdAt }) {
+function Post({ postId, avatar, createdBy, title, content, likes, comments: initialComments, createdAt,addCommentToPost }) {
   const [user, setUser] = useState({ username: createdBy.username });
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(likes);
@@ -72,53 +72,52 @@ function Post({ postId, avatar, createdBy, title, content, likes, comments: init
   // Function to handle the like button click
   const handleLike = async () => {
     try {
-   
+        console.log(postId);
 
-      let res=await api.post("/post/likepost")
+      let res=await api.post("/post/likepost",{postid:postId})
      if(res.status==200){
 
-     
+      
       setIsLiked(true);
       setLikeCount((prev) => prev + 1);
      }
-      // Update local storage to reflect that the post has been liked
-      const likedPosts = JSON.parse(localStorage.getItem("likedPosts")) || [];
-      likedPosts.push(postId);
-      localStorage.setItem("likedPosts", JSON.stringify(likedPosts));
+
 
     } catch (error) {
       console.error("Error liking the post:", error.response ? error.response.data : error.message);
     }
   };
+ const handleremovelike=async()=>{
+      try{
+        let res=await api.post('post/unlikepost',{postid:postId});
 
+         if(res.status!=200){
+          throw new Error ("Error occured while unliking the post");
+         }
+         setIsLiked(false);
+         setLikeCount((prev) => prev - 1);
+      }
+      catch(e){
+        console.log("Error",e.message)
+      }
+ }
   // Function to handle comment submission
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!commentText.trim()) return;
-
+    const newComment = {
+      text: commentText,
+      createdBy: { username: createdBy.username }, // Assuming you have the username
+      createdAt: new Date().toISOString(),
+    };
     try {
-      setSubmittingComment(true);
-
-      const token = localStorage.getItem("token");
-      if (!token) {
-        console.error("No token found. Please log in.");
-        return;
+        let response=await api.post("/post/comment",{postid:postId,text:commentText})
+  
+      if(response.status!=200) {
+        throw error("error occured while commenting on the post ")
       }
-
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-      };
-
-      // const response = await axios.post(
-      //   `http://localhost:5000/api/posts/${postId}/comment`,
-      //   { text: commentText },
-      //   config
-      // );
-
-      setComments(response.data.comments);
+     
+      
       setCommentText("");
       setSubmittingComment(false);
 
@@ -127,6 +126,8 @@ function Post({ postId, avatar, createdBy, title, content, likes, comments: init
       setSubmittingComment(false);
     }
   };
+
+
 
   return (
     <motion.article
@@ -206,7 +207,7 @@ function Post({ postId, avatar, createdBy, title, content, likes, comments: init
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={handleLike}
+          onClick={isLiked?handleremovelike:handleLike}
           className={`flex items-center space-x-2 px-3 py-1.5 rounded-full ${
             isLiked 
               ? "text-accent bg-accent/10" 

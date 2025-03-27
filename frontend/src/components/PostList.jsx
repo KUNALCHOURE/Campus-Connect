@@ -15,6 +15,7 @@ function PostList({ selectedTab }) {
            const result=await api.get('/post/getpost');
            console.log(result.data.data);
            setPosts(result.data.data);
+           console.log(result.data.data.comments);
 
            if(result){
             setIsLoading(false);
@@ -29,7 +30,16 @@ function PostList({ selectedTab }) {
 
     fetchPosts();
   }, []); // Fetch posts whenever the tab changes
-
+  
+  const addCommentToPost = (postId, newComment) => {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post._id === postId
+          ? { ...post, comments: [...post.comments, newComment] }
+          : post
+      )
+    );
+  };
   return (
     <div>
       {isLoading ? (
@@ -49,6 +59,7 @@ function PostList({ selectedTab }) {
             likes={post.likes}
             createdAt={post.createdAt} // Added createdAt for formatting
             comments={post.comments} // Use comments property
+            addCommentToPost={addCommentToPost}
           />
         ))
       ) : (
