@@ -75,6 +75,34 @@ console.log(postid);
     .json(new Apiresponse(200,{},"Post liked successfully"))
 
     
+});
+
+const unlikepost=asynchandler(async(req,res)=>{
+    const {postid}=req.body;
+    console.log(postid);
+
+    // Check if the post ID is valid
+    if (!mongoose.Types.ObjectId.isValid(postid)) {
+        throw new Apierror(400, "Invalid post id");
+    }
+    const currentPost = await post.findById(postid);
+    if (!currentPost) {
+        throw new Apierror(404, "Unable to find the post");
+    }
+
+    const currentUser = req.user;
+    console.log(currentUser);
+
+    if (currentUser.likedPosts.includes(postid)) {
+        currentPost.likes -= 1; // Decrement the likes count
+        currentUser.likedPosts = currentUser.likedPosts.filter(id => id.toString() !== postid); // Remove post ID from likedPosts
+    } else {
+        throw new Apierror(400, "User has not liked the post");
+    }
+    await currentPost.save();
+    await currentUser.save();
+
+    return res.status(200).json(new Apiresponse(200, {}, "Post unliked successfully"));
 })
 
 
@@ -132,4 +160,4 @@ const getcomment=asynchandler(async(req,res)=>{
 })
 
 
-export {createpost,getpost,likepost,addcomment,getcomment};
+export {createpost,getpost,likepost,addcomment,getcomment,unlikepost};
