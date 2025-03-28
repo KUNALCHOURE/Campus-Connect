@@ -1,0 +1,290 @@
+body {
+    background: #000000;
+    margin: 0;
+    padding: 0;
+    height: 100vh; /* Full viewport height */
+    overflow: hidden; /* Prevent scrolling on the body */
+  }
+  .chat-container {
+    max-width: 100%; /* Remove max-width limitation */
+    margin: 0; /* Remove margins */
+    border-radius: 0; /* Remove border radius */
+    box-shadow: none; /* Remove shadow */
+    background: #121212;
+    height: 100vh; /* Full viewport height */
+    display: flex;
+    flex-direction: column;
+  }
+  
+  
+  .chat-header {
+    background: linear-gradient(135deg, #000000, #1e90ff);
+    color: white;
+    padding: 15px; /* Reduced padding */
+    border-radius: 0; /* Remove border radius */
+    text-align: center;
+  }
+  .chat-header h2 {
+    margin: 0; /* Remove margin from header */
+    padding: 10px;
+  }
+  
+  .messages-container {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background: #1a1a1a;
+  }
+  
+  .message {
+    margin: 20px 0;
+    padding: 15px;
+    border-radius: 15px;
+    max-width: 70%;
+    word-wrap: break-word;
+  }
+  
+  .user-message {
+    background: #000000;
+    color: white;
+    margin-left: auto; /* This pushes the message to the right */
+    margin-right: 20px; /* Add some spacing from right edge */
+    border: 1px solid #1e90ff;
+    border-top-right-radius: 5px; /* Make right top corner more pointed */
+  }
+  
+  
+  .bot-message {
+    background: #1e90ff;
+    color: white;
+    margin-right: auto; /* This pushes the message to the left */
+    margin-left: 20px; /* Add some spacing from left edge */
+    border-top-left-radius: 5px; /* Make left top corner more pointed */
+  }
+  
+  .input-container {
+    padding: 15px 20px;
+    display: flex;
+    gap: 15px; /* Increased gap */
+    background: #121212;
+    border-top: 1px solid #333;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    align-items: center; /* Center items vertically */
+  }
+  
+  input {
+    flex: 1;
+    padding: 15px;
+    border: 2px solid #333;
+    border-radius: 25px;
+    outline: none;
+    font-size: 16px;
+    background: #2a2a2a; /* Dark input background */
+    color: white;
+  }
+  
+  input:focus {
+    border-color: #1e90ff;
+  }
+  
+  input::placeholder {
+    color: #888;
+  }
+  
+  button {
+    padding: 15px 30px;
+    background: linear-gradient(135deg, #000000, #1e90ff); /* Black to blue gradient */
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: transform 0.2s;
+  }
+  
+  button:hover {
+    transform: scale(1.05);
+    background: linear-gradient(135deg, #1e90ff, #000000); /* Reverse gradient on hover */
+  }
+  
+  /* Keep existing animations */
+  .messages-container {
+    padding-bottom: 80px; /* Add space for input container */
+  }
+  
+  .message {
+    margin: 20px 0;
+    padding: 15px;
+    border-radius: 15px;
+    max-width: 70%;
+    word-wrap: break-word;
+    text-align: left; /* Default text alignment */
+  }
+  .user-message {
+    background: #000000;
+    color: white;
+    margin-left: auto; /* Push to right */
+    margin-right: 0; /* Align to right */
+    text-align: right; /* Align text to right */
+    border: 1px solid #1e90ff;
+    border-radius: 15px 15px 0 15px;
+  }
+  .upload-button {
+    background: transparent;
+    border: 2px solid #1e90ff;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .upload-button:hover {
+    background: rgba(30, 144, 255, 0.1);
+  }
+  .message img {
+    max-width: 100%;
+    border-radius: 10px;
+  }
+  .user-message::after {
+    content: '';
+    position: absolute;
+    right: -10px;
+    top: 0;
+    border: 10px solid transparent;
+    border-left-color: #000000;
+  }
+  .bot-message::after {
+    content: '';
+    position: absolute;
+    left: -10px;
+    top: 0;
+    border: 10px solid transparent;
+    border-right-color: #1e90ff;
+  }
+  .upload-input {
+    display: none;
+  }
+  .messages-container {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    padding-bottom: 80px;
+  }
+  .bot-message {
+    background: #1e90ff;
+    color: white;
+    margin-right: auto; /* Push to left */
+    margin-left: 0; /* Align to left */
+    text-align: left; /* Align text to left */
+    border-radius: 15px 15px 15px 0;
+  }
+  .message-container {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start; /* Default alignment */
+  }
+.message {
+    position: relative;
+  }
+  .message img {
+    max-width: 300px;
+    border-radius: 10px;
+    display: block;
+    margin: 0 auto;
+  }
+  
+  .user-message img {
+    margin-left: auto;
+  }
+  
+  .bot-message img {
+    margin-right: auto;
+  }
+  .message-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .message-content p {
+    margin: 0;
+  }
+  
+  .numbered-item {
+    padding: 8px;
+    margin: 4px 0;
+    background: rgba(30, 144, 255, 0.1);
+    border-radius: 8px;
+    font-weight: 500;
+  }
+  
+  .highlighted-text {
+    font-weight: bold;
+    color: #1e90ff;
+    margin: 4px 0;
+  }
+  
+  .bot-message .message-content {
+    color: white;
+  }
+  
+  .user-message .message-content {
+    color: white;
+  }
+  
+  .message {
+    margin: 20px 0;
+    padding: 15px;
+    border-radius: 15px;
+    max-width: 70%;
+    word-wrap: break-word;
+    line-height: 1.5;
+  }
+  
+  .bot-message {
+    background: #1e90ff;
+    border-radius: 15px 15px 15px 0;
+    align-self: flex-start;
+  }
+  
+  .user-message {
+    background: #000000;
+    border: 1px solid #1e90ff;
+    border-radius: 15px 15px 0 15px;
+    align-self: flex-end;
+  }
+  
+  /* Add spacing between messages */
+  .messages-container > div:not(:last-child) {
+    margin-bottom: 16px;
+  }
+  
+  /* Style for numbered lists */
+  .numbered-item {
+    display: flex;
+    align-items: flex-start;
+    position: relative;
+  }
+  
+  /* Add some animation */
+  .message {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
