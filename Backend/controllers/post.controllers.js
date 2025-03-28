@@ -19,7 +19,7 @@ const createpost=asynchandler(async(req,res)=>{
      const newpost =await post.create({
         title,
         content,
-        tags: tags.split(",").map(tag => tag.trim()),
+        tags: tags ? (Array.isArray(tags) ? tags : tags.split(",").map(tag => tag.trim())) : [],
         createdBy
 
      })

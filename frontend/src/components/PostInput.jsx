@@ -1,18 +1,21 @@
-import React, { useState } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from "react";
+import api from "../services/api.js";
 import profile from ".././assets/vhjkl.jpeg";
-import { ImCross } from "react-icons/im";
-import { FaPen, FaQuestionCircle, FaTimes } from "react-icons/fa";
+import { FaPen, FaTimes } from "react-icons/fa";
 
-function PostInput() {
+function PostInput({ onPostCreated }) {
   const [showModal, setShowModal] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("Updates");
   const [postContent, setPostContent] = useState("");
   const [title, setTitle] = useState("");
   const [tags, setTags] = useState("");
+  const [error, setError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const baseURL = "http://localhost:5000/api/posts";
-  const discussionURL = "http://localhost:5000/api/discussions";
+  // Debug mounting
+  useEffect(() => {
+    console.log("PostInput mounted");
+    return () => console.log("PostInput unmounted");
+  }, []);
 
   const handleInputClick = () => setShowModal(true);
 
@@ -21,51 +24,48 @@ function PostInput() {
     setPostContent("");
     setTitle("");
     setTags("");
-  };
-
-  const handleCategorySelect = (category) => {
-    setSelectedCategory(category);
-    setShowModal(true);
+    setError(null);
   };
 
   const handlePostSubmit = async () => {
+    if (!title.trim() || !postContent.trim()) {
+      setError("Title and content are required");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
     const postData = {
-      title: title,
-      content: postContent,
-      tags: tags.split(",").map((tag) => tag.trim()),
+      title: title.trim(),
+      content: postContent.trim(),
+      tags: tags ? tags.split(",").map((tag) => tag.trim()) : [],
     };
 
-    const apiURL =
-      selectedCategory === "Ask Questions" ? discussionURL : baseURL;
-
-    const token = localStorage.getItem("token");
-
     try {
-      const response = await axios.post(apiURL, postData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const response = await api.post("/post/create-post", postData, {
+        headers: { "Content-Type": "application/json" },
       });
       console.log("Post successful: ", response.data);
+      onPostCreated(response.data.data);
       closeModal();
-      window.location.reload(); // Refresh to see the new post
     } catch (error) {
+      const errorMessage = error.response?.data?.message || "Failed to create post";
+      setError(errorMessage);
       console.error("Error creating post: ", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <div className="bg-secondary p-5 rounded-lg shadow-md w-full max-w-lg mx-auto">
-      {/* Top Input Section */}
       <div className="flex items-center space-x-4 mb-4">
-        {/* Profile Picture */}
         <img
           src={profile}
           alt="Profile"
           className="w-12 h-12 rounded-full border-2 border-accent"
         />
-
-        {/* Input Field */}
         <input
           type="text"
           placeholder="What's Happening?"
@@ -74,108 +74,78 @@ function PostInput() {
         />
       </div>
 
-      {/* Category Buttons Row */}
-      <div className="flex justify-evenly mb-4">
-        {/* Updates Button */}
+      <div className="flex justify-center mb-4">
         <button
-          className={`py-2 px-6 rounded-full transition-all duration-300 flex items-center ${
-            selectedCategory === "Updates"
-              ? "bg-accent text-white shadow-md" 
-              : "bg-transparent border border-accent/30 text-text-secondary hover:bg-card"
-          }`}
-          onClick={() => handleCategorySelect("Updates")}
+          className="py-2 px-6 rounded-full transition-all duration-300 flex items-center bg-accent text-white shadow-md"
+          onClick={handleInputClick}
         >
-          <FaPen className={`mr-2 ${selectedCategory === "Updates" ? "text-white" : "text-accent"}`} />
+          <FaPen className="mr-2 text-white" />
           Updates
-        </button>
-
-        {/* Ask Questions Button */}
-        <button
-          className={`py-2 px-6 rounded-full transition-all duration-300 flex items-center ${
-            selectedCategory === "Ask Questions"
-              ? "bg-accent text-white shadow-md" 
-              : "bg-transparent border border-accent/30 text-text-secondary hover:bg-card"
-          }`}
-          onClick={() => handleCategorySelect("Ask Questions")}
-        >
-          <FaQuestionCircle className={`mr-2 ${selectedCategory === "Ask Questions" ? "text-white" : "text-accent"}`} />
-          Ask Questions
         </button>
       </div>
 
-      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-primary/80 z-50 backdrop-blur-sm">
           <div className="bg-secondary p-6 rounded-lg w-full max-w-md mx-auto relative shadow-lg border border-card-border">
             <h3 className="text-text-primary text-xl font-semibold mb-4 flex items-center">
-              {selectedCategory === "Ask Questions" ? (
-                <>
-                  <FaQuestionCircle className="text-accent mr-2" />
-                  Ask a Question
-                </>
-              ) : (
-                <>
-                  <FaPen className="text-accent mr-2" />
-                  Create a Post for Updates
-                </>
-              )}
+              <FaPen className="text-accent mr-2" />
+              Create a Post
             </h3>
 
-            {/* Title Input */}
+            {error && (
+              <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+                {error}
+              </div>
+            )}
+
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder={
-                selectedCategory === "Ask Questions"
-                  ? "Enter your question title"
-                  : "Enter the title"
-              }
+              placeholder="Enter the title"
               className="w-full mb-3 bg-input text-text-primary p-3 rounded-lg outline-none border border-card-border focus:border-accent"
+              disabled={isSubmitting}
             />
 
-            {/* Textarea for content */}
             <textarea
               className="w-full bg-input text-text-primary p-3 rounded-lg outline-none border border-card-border focus:border-accent"
               rows="5"
               value={postContent}
               onChange={(e) => setPostContent(e.target.value)}
-              placeholder={
-                selectedCategory === "Ask Questions"
-                  ? "Write your question"
-                  : "Write something for Updates"
-              }
+              placeholder="Write something for Updates"
+              disabled={isSubmitting}
             ></textarea>
 
-            {/* Input for Tags */}
             <input
               type="text"
               value={tags}
               onChange={(e) => setTags(e.target.value)}
               placeholder="Enter tags (comma separated)"
               className="w-full mt-3 bg-input text-text-primary p-3 rounded-lg outline-none border border-card-border focus:border-accent"
+              disabled={isSubmitting}
             />
 
-            {/* Modal Buttons */}
             <div className="flex justify-end mt-4 space-x-2">
               <button
                 className="bg-input text-text-secondary px-4 py-2 rounded-lg hover:bg-card transition-colors"
                 onClick={closeModal}
+                disabled={isSubmitting}
               >
                 Cancel
               </button>
               <button
-                className="bg-accent text-white px-4 py-2 rounded-lg hover:bg-accent-hover transition-colors"
+                className="bg-accent text-white px-4 py-2 rounded-lg hover:bg-accent-hover transition-colors disabled:opacity-50"
                 onClick={handlePostSubmit}
+                disabled={isSubmitting}
               >
-                {selectedCategory === "Ask Questions" ? "Ask" : "Post"}
+                {isSubmitting ? "Posting..." : "Post"}
               </button>
             </div>
 
-            {/* Close button in top-right corner */}
             <button
               className="absolute top-3 right-3 text-text-muted hover:text-text-primary transition-colors bg-input hover:bg-card rounded-full p-2"
               onClick={closeModal}
+              disabled={isSubmitting}
             >
               <FaTimes />
             </button>

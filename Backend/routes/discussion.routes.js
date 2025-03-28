@@ -1,11 +1,36 @@
 import { Router } from "express";
-import {creatediscussion,getdiscussion,addcomment} from '../controllers/discussion.controllers.js'
 import { verifyjwt } from "../middlewares/authmiddleware.js";
+import {
+    createDiscussion,
+    getDiscussions,
+    getDiscussionById,
+    updateDiscussion,
+    deleteDiscussion,
+    addComment,
+    toggleLike
+} from "../controllers/discussion.controllers.js";
 
-const router=Router();
+const router = Router();
 
-router.route('/getdiscussion').get(verifyjwt,getdiscussion);
-router.route('/creatediscussion').post(verifyjwt,creatediscussion);
-router.route('/:discussionid/addcomment').post(verifyjwt,addcomment);
+// Apply verifyjwt middleware to all routes
+router.use(verifyjwt);
+
+// Discussion routes
+router.route("/")
+    .post(createDiscussion)
+    .get(getDiscussions);
+
+router.route("/:discussionId")
+    .get(getDiscussionById)
+    .put(updateDiscussion)
+    .delete(deleteDiscussion);
+
+// Comment routes
+router.route("/:discussionId/comments")
+    .post(addComment);
+
+// Like routes
+router.route("/:discussionId/like")
+    .post(toggleLike);
 
 export default router;
