@@ -172,8 +172,6 @@ const addComment = asynchandler(async (req, res) => {
     return res.status(200)
         .json(new Apiresponse(200, discussionData, "Comment added successfully"));
 });
-
-// Like/Unlike a discussion
 const toggleLike = asynchandler(async (req, res) => {
     const { discussionId } = req.params;
 
@@ -181,29 +179,38 @@ const toggleLike = asynchandler(async (req, res) => {
         throw new Apierror(400, "Invalid discussion ID");
     }
 
-    const discussionData = await discussion.findById(discussionId);
-
-    if (!discussionData) {
+    const currentDiscussion = await discussion.findById(discussionId);
+    if (!currentDiscussion) {
         throw new Apierror(404, "Discussion not found");
     }
 
-    const userLiked = discussionData.likes.includes(req.user._id);
+    const currentUser = req.user;
 
-    if (userLiked) {
-        discussionData.likes = discussionData.likes.filter(id => id.toString() !== req.user._id.toString());
-    } else {
-        discussionData.likes.push(req.user._id);
+    // Check if the user has already liked the discussion
+    if (!currentUser.likedDiscussions) {
+        currentUser.likedDiscussions = []; // Initialize if not present
     }
 
-    await discussionData.save();
+    const userLiked = currentUser.likedDiscussions.includes(discussionId);
 
-    return res.status(200)
-        .json(new Apiresponse(200, {
-            likes: discussionData.likes.length,
-            liked: !userLiked
-        }, userLiked ? "Discussion unliked successfully" : "Discussion liked successfully"));
+    if (userLiked) {
+        // Unlike: Decrease likes count and remove from user's likedDiscussions
+        currentDiscussion.likes -= 1;
+        currentUser.likedDiscussions = currentUser.likedDiscussions.filter(id => id.toString() !== discussionId);
+    } else {
+        // Like: Increase likes count and add to user's likedDiscussions
+        currentDiscussion.likes += 1;
+        currentUser.likedDiscussions.push(discussionId);
+    }
+
+    await currentDiscussion.save();
+    await currentUser.save();
+
+    return res.status(200).json(new Apiresponse(200, {
+        likes: currentDiscussion.likes,
+        liked: !userLiked
+    }, userLiked ? "Discussion unliked successfully" : "Discussion liked successfully"));
 });
-
 export {
     createDiscussion,
     getDiscussions,
