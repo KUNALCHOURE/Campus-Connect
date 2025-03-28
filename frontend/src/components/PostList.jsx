@@ -9,13 +9,11 @@ function PostList({ selectedTab, setSelectedTab }) {
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Debug mounting
   useEffect(() => {
     console.log("PostList mounted");
     return () => console.log("PostList unmounted");
   }, []);
 
-  // Fetch posts
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -23,7 +21,7 @@ function PostList({ selectedTab, setSelectedTab }) {
         const result = await api.get("/post/getpost");
         console.log(result.data.data);
         setPosts(result.data.data);
-        setFilteredPosts(result.data.data); // Initially show all posts
+        setFilteredPosts(result.data.data);
         setIsLoading(false);
       } catch (error) {
         setIsLoading(false);
@@ -35,17 +33,14 @@ function PostList({ selectedTab, setSelectedTab }) {
     fetchPosts();
   }, []);
 
-  // Filter posts based on selected tab
   useEffect(() => {
     if (selectedTab === "all") {
       setFilteredPosts(posts);
-    } else if (selectedTab === "hybrid") { // "hybrid" corresponds to "Recommended"
-      // Example: Filter posts with likes > 0 for "Recommended"
+    } else if (selectedTab === "hybrid") {
       setFilteredPosts(posts.filter((post) => post.likes > 0));
     }
   }, [selectedTab, posts]);
 
-  // Handle new post creation
   const handlePostCreated = (newPost) => {
     setPosts((prevPosts) => [newPost, ...prevPosts]);
   };
@@ -60,12 +55,14 @@ function PostList({ selectedTab, setSelectedTab }) {
     );
   };
 
+  // Handle post deletion
+  const handlePostDeleted = (postId) => {
+    setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
+  };
+
   return (
     <div>
-      {/* Add PostInput at the top */}
       <PostInput onPostCreated={handlePostCreated} />
-
-      {/* Tab Buttons */}
       <div className="flex justify-center my-6">
         <button
           className={`border border-accent/30 text-primary-color py-2 px-6 m-1 rounded-full transition-colors duration-300 hover:bg-accent hover:text-white ${
@@ -84,7 +81,6 @@ function PostList({ selectedTab, setSelectedTab }) {
           Recommended
         </button>
       </div>
-
       {isLoading ? (
         <div className="flex justify-center items-center">
           <div className="loader"></div>
@@ -103,6 +99,7 @@ function PostList({ selectedTab, setSelectedTab }) {
             createdAt={post.createdAt}
             comments={post.comments}
             addCommentToPost={addCommentToPost}
+            onDelete={handlePostDeleted} // Pass the onDelete callback
           />
         ))
       ) : (

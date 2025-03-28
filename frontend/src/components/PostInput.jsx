@@ -80,7 +80,7 @@ function PostInput({ onPostCreated }) {
           onClick={handleInputClick}
         >
           <FaPen className="mr-2 text-white" />
-          Updates
+         Create Post
         </button>
       </div>
 

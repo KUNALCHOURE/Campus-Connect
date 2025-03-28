@@ -2,14 +2,13 @@ import React, { useEffect, useState } from "react";
 import { AiFillLike, AiOutlineLike } from "react-icons/ai";
 import { FaRegComment, FaUserCircle } from "react-icons/fa";
 import { IoTimeOutline, IoSend, IoEllipsisHorizontal } from "react-icons/io5";
+import { FaTrash } from "react-icons/fa"; // Add trash icon for delete
 import { motion, AnimatePresence } from "framer-motion";
-
 import api from "../services/api";
-import { post } from "../../../Backend/models/Post.model";
 import { useAuth } from "../utils/autcontext";
 
-function Post({ postId, avatar, createdBy, title, content, likes, comments: initialComments, createdAt,addCommentToPost }) {
-  const{user}=useAuth();
+function Post({ postId, avatar, createdBy, title, content, likes, comments: initialComments, createdAt, addCommentToPost, onDelete }) {
+  const { user } = useAuth();
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(likes);
   const [comments, setComments] = useState(initialComments);
@@ -24,19 +23,16 @@ function Post({ postId, avatar, createdBy, title, content, likes, comments: init
     const date = new Date(dateString);
     const now = new Date();
     
-    // Check if it's today
     if (date.toDateString() === now.toDateString()) {
       return `Today at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
     }
     
-    // Check if it's yesterday
     const yesterday = new Date(now);
     yesterday.setDate(now.getDate() - 1);
     if (date.toDateString() === yesterday.toDateString()) {
       return `Yesterday at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
     }
     
-    // Otherwise, return a formatted date
     return date.toLocaleDateString('en-US', { 
       day: 'numeric', 
       month: 'short', 
@@ -48,7 +44,6 @@ function Post({ postId, avatar, createdBy, title, content, likes, comments: init
 
   const formattedDate = formatDate(createdAt);
 
-  // Function to safely format comment dates
   const formatCommentDate = (dateString) => {
     if (!dateString) return "Recent";
     
@@ -63,45 +58,36 @@ function Post({ postId, avatar, createdBy, title, content, likes, comments: init
   };
 
   useEffect(() => {
-    // Check if the post is already liked by the user
     if (user && user.likedPosts) {
       setIsLiked(user.likedPosts.includes(postId));
     }
   }, [user, postId]);
 
-  // Function to handle the like button click
   const handleLike = async () => {
     try {
-        console.log(postId);
-
-      let res=await api.post("/post/likepost",{postid:postId})
-     if(res.status==200){
-
-      
-      setIsLiked(true);
-      setLikeCount((prev) => prev + 1);
-     }
-
-
+      let res = await api.post("/post/likepost", { postid: postId });
+      if (res.status === 200) {
+        setIsLiked(true);
+        setLikeCount((prev) => prev + 1);
+      }
     } catch (error) {
       console.error("Error liking the post:", error.response ? error.response.data : error.message);
     }
   };
- const handleremovelike=async()=>{
-      try{
-        let res=await api.post('post/unlikepost',{postid:postId});
 
-         if(res.status!=200){
-          throw new Error ("Error occured while unliking the post");
-         }
-         setIsLiked(false);
-         setLikeCount((prev) => prev - 1);
+  const handleremovelike = async () => {
+    try {
+      let res = await api.post('post/unlikepost', { postid: postId });
+      if (res.status !== 200) {
+        throw new Error("Error occurred while unliking the post");
       }
-      catch(e){
-        console.log("Error",e.message)
-      }
- }
-  // Function to handle comment submission
+      setIsLiked(false);
+      setLikeCount((prev) => prev - 1);
+    } catch (e) {
+      console.log("Error", e.message);
+    }
+  };
+
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!commentText.trim()) return;
@@ -113,22 +99,18 @@ function Post({ postId, avatar, createdBy, title, content, likes, comments: init
 
     const newComment = {
       text: commentText,
-      createdBy: { username: user.username }, // Use the current user's username
+      createdBy: { username: user.username },
       createdAt: new Date().toISOString(),
     };
 
     try {
       let response = await api.post(`/post/${postId}/addcomment`, { text: commentText });
-
       if (response.status !== 200) {
         throw new Error("Error occurred while commenting on the post");
       }
 
-      // Update the comments state locally
       setComments((prevComments) => [...prevComments, newComment]);
-      // Update the parent component's state
       addCommentToPost(postId, newComment);
-
       setCommentText("");
       setSubmittingComment(false);
     } catch (error) {
@@ -137,6 +119,22 @@ function Post({ postId, avatar, createdBy, title, content, likes, comments: init
     }
   };
 
+  // Function to handle post deletion
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this post?")) return;
+
+    try {
+      const response = await api.post("/post/deletepost", { postid: postId });
+      if (response.status !== 200) {
+        throw new Error("Error occurred while deleting the post");
+      }
+
+      // Notify the parent component to remove the post from the list
+      onDelete(postId);
+    } catch (error) {
+      console.error("Error deleting the post:", error.response ? error.response.data : error.message);
+    }
+  };
 
   return (
     <motion.article
@@ -185,9 +183,23 @@ function Post({ postId, avatar, createdBy, title, content, likes, comments: init
                 <span>{formattedDate}</span>
               </motion.div>
             </div>
-            <button className="text-text-muted hover:text-text-primary p-1 rounded-full hover:bg-card transition-colors">
-              <IoEllipsisHorizontal />
-            </button>
+            <div className="flex items-center space-x-2">
+              {/* Delete Button (only visible to the post creator) */}
+              {user && user._id === createdBy.id._id.toString() && (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleDelete}
+                  className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition-colors"
+                  title="Delete Post"
+                >
+                  <FaTrash />
+                </motion.button>
+              )}
+              <button className="text-text-muted hover:text-text-primary p-1 rounded-full hover:bg-card transition-colors">
+                <IoEllipsisHorizontal />
+              </button>
+            </div>
           </div>
           
           <motion.h2
@@ -216,7 +228,7 @@ function Post({ postId, avatar, createdBy, title, content, likes, comments: init
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={isLiked?handleremovelike:handleLike}
+          onClick={isLiked ? handleremovelike : handleLike}
           className={`flex items-center space-x-2 px-3 py-1.5 rounded-full ${
             isLiked 
               ? "text-accent bg-accent/10" 
@@ -258,7 +270,6 @@ function Post({ postId, avatar, createdBy, title, content, likes, comments: init
           >
             <div className="border-t border-card-border my-3"></div>
             
-            {/* Comment Form */}
             <form onSubmit={handleCommentSubmit} className="flex items-end space-x-2 mb-4">
               <div className="flex-1">
                 <textarea
@@ -282,7 +293,6 @@ function Post({ postId, avatar, createdBy, title, content, likes, comments: init
               </motion.button>
             </form>
             
-            {/* Comments List */}
             <motion.div 
               className="space-y-4 mt-4 max-h-96 overflow-y-auto pr-2"
               initial={{ opacity: 0 }}

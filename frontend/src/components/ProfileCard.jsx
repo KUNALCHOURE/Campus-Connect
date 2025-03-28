@@ -1,10 +1,44 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import photo from ".././assets/vhjkl.jpeg";
 import coverimage from "../assets/coverimage.jpg";
 import { useAuth } from "../utils/autcontext";
+import api from "../services/api"; // Import API to fetch additional data if needed
+
 function ProfileCard() {
-  let{user}=useAuth();
+  const { user } = useAuth();
+  const [postCount, setPostCount] = useState(0); // State to store the user's post count
+
+  // Fetch the user's post count (optional, if not provided by backend)
+  useEffect(() => {
+    const fetchPostCount = async () => {
+      try {
+        const response = await api.get("/post/getpost");
+        const posts = response.data.data;
+        // Filter posts created by the current user
+        const userPosts = posts.filter((post) => post.createdBy.id === user._id);
+        setPostCount(userPosts.length);
+      } catch (error) {
+        console.error("Error fetching post count:", error);
+      }
+    };
+
+    if (user && user._id) {
+      fetchPostCount();
+    }
+  }, [user]);
+
+  // Format the join date
+  const formatJoinDate = (dateString) => {
+    if (!dateString) return "Unknown date";
+    const date = new Date(dateString);
+    return `Joined ${date.toLocaleDateString("en-US", { month: "long", year: "numeric" })}`;
+  };
+
+  // Use a fallback if user data is not available
+  if (!user) {
+    return <div>Loading profile...</div>;
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -39,7 +73,11 @@ function ProfileCard() {
             <motion.img
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 200 }}
-              src={photo}
+              src={
+                user.profileimage
+                  ? user.profileimage
+                  : `https://ui-avatars.com/api/?name=${user.username}&background=random`
+              }
               alt="Profile"
               className="w-24 h-24 rounded-full object-cover border-4 border-secondary shadow-lg"
             />
@@ -47,8 +85,19 @@ function ProfileCard() {
               className="absolute bottom-0 right-0 bg-accent w-8 h-8 rounded-full flex items-center justify-center border-2 border-secondary"
               whileHover={{ scale: 1.2, rotate: 15 }}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                />
               </svg>
             </motion.div>
           </div>
@@ -77,7 +126,7 @@ function ProfileCard() {
           transition={{ delay: 0.45 }}
           className="text-sm font-medium text-text-muted mt-1"
         >
-          @sample
+          @{user.username.toLowerCase()}
         </motion.p>
         
         <motion.div 
@@ -86,12 +135,10 @@ function ProfileCard() {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.5 }}
         >
-          <motion.p 
-            className="text-sm text-text-secondary leading-relaxed"
-          >
-            Computer Science Student
-            <br /> Full-Stack Developer
-            <br /> UI/UX Enthusiast
+          <motion.p className="text-sm text-text-secondary leading-relaxed">
+            {user.email}
+            <br />
+            {formatJoinDate(user.createdAt)}
           </motion.p>
         </motion.div>
 
@@ -110,7 +157,7 @@ function ProfileCard() {
               whileHover={{ scale: 1.1 }} 
               className="text-lg font-bold text-accent"
             >
-              1,002
+              {user.likedPosts.length}
             </motion.p>
             <p className="text-xs font-medium text-text-muted mt-1">Likes</p>
           </motion.div>
@@ -123,7 +170,7 @@ function ProfileCard() {
               whileHover={{ scale: 1.1 }} 
               className="text-lg font-bold text-accent"
             >
-              32
+              {postCount}
             </motion.p>
             <p className="text-xs font-medium text-text-muted mt-1">Posts</p>
           </motion.div>

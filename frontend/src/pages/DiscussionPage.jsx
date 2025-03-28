@@ -1,17 +1,21 @@
 import { useEffect, useState, useRef } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import { IoSearchOutline } from "react-icons/io5";
 import Header from '../components/Header';
-import { FaUserFriends, FaCommentAlt, FaBook, FaClock, FaFilter, FaTag, FaThumbsUp, FaComment } from "react-icons/fa";
+import { FaUserFriends, FaCommentAlt, FaBook, FaClock, FaFilter, FaTag, FaThumbsUp, FaRegThumbsUp, FaComment } from "react-icons/fa";
 import DiscussionModal from '../components/DiscussionModal';
 import DiscussionDetails from '../components/DiscussionDetails';
+import { useAuth } from '../utils/autcontext';
 
 function DiscussionPage() {
+  const { user } = useAuth();
   const [discussions, setDiscussions] = useState([]);
   const [search, setSearch] = useState("");
+  const [selectedTag, setSelectedTag] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDiscussion, setSelectedDiscussion] = useState(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [error, setError] = useState(null);
   const [popularTopics] = useState([
     "Dynamic Programming",
     "Graph Algorithms",
@@ -22,24 +26,39 @@ function DiscussionPage() {
   const [upcomingContests] = useState([
     { name: "CodeForces Round #890", platform: "CodeForces", division: "Div 2" }
   ]);
-  const [groupInfo] = useState({
+  const [groupInfo, setGroupInfo] = useState({
     name: "Competitive Programming",
     description: "A community of competitive programmers sharing resources, discussing problems, and preparing for contests.",
     members: 156,
-    discussions: 3
+    discussions: 0
   });
   const debounceTimeoutRef = useRef(null);
 
   useEffect(() => {
     fetchDiscussions();
-  }, []);
+  }, [selectedTag]);
 
-  const fetchDiscussions = async (searchTerm = "") => {
+  const fetchDiscussions = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/discussions?search=${searchTerm}`);
-      setDiscussions(response.data);
+      setError(null);
+      console.log("Fetching all discussions...");
+      const response = await api.get('/discussion');
+      console.log("Response from API:", response.data);
+  
+      // Log usernames from each discussion in the array
+      const discussions = response.data.data.discussions;
+      discussions.forEach((discussion, index) => {
+        console.log(`Discussion ${index + 1} username:`, discussion.createdBy?.username || "No username");
+      });
+  
+      setDiscussions(discussions);
+      setGroupInfo((prev) => ({
+        ...prev,
+        discussions: response.data.data.total || 0
+      }));
     } catch (error) {
       console.error("Error fetching discussions:", error);
+      setError(error.response?.data?.message || "Failed to fetch discussions. Please try again.");
     }
   };
 
@@ -52,8 +71,12 @@ function DiscussionPage() {
     }
 
     debounceTimeoutRef.current = setTimeout(() => {
-      fetchDiscussions(value);
+      fetchDiscussions(value, selectedTag);
     }, 300);
+  };
+
+  const handleTagFilter = (tag) => {
+    setSelectedTag(tag === selectedTag ? "" : tag);
   };
 
   const openModal = () => setIsModalOpen(true);
@@ -66,12 +89,137 @@ function DiscussionPage() {
 
   const closeDiscussionDetails = () => {
     setIsDetailsOpen(false);
+    setSelectedDiscussion(null);
   };
 
-  return (
+  // Discussion Card Component
+  function DiscussionCard({ discussion, onClick }) {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [isLiking, setIsLiking] = useState(false);
+    const [liked, setLiked] = useState(false);
+  
+    useEffect(() => {
+      const checkLikeStatus = async () => {
+        try {
+          const response = await api.post(`/discussion/${discussion._id}/like`);
+          setLiked(response.data.data.liked);
+        } catch (error) {
+          console.error("Error checking like status:", error);
+        }
+      };
+      if (user) {
+        checkLikeStatus();
+      }
+    }, [discussion._id, user]);
+  
+    const handleReadMoreClick = (e) => {
+      e.stopPropagation();
+      setIsExpanded(true);
+    };
+  
+    const handleLike = async (e) => {
+      e.stopPropagation();
+      if (isLiking) return;
+      setIsLiking(true);
+      try {
+        const response = await api.post(`/discussion/${discussion._id}/like`);
+        setLiked(response.data.data.liked);
+        fetchDiscussions();
+      } catch (error) {
+        console.error("Error toggling like:", error);
+      } finally {
+        setIsLiking(false);
+      }
+    };
+  
+    const formatDate = (dateString) => {
+      if (!dateString) return "Unknown date";
+      const date = new Date(dateString);
+      const now = new Date();
+      if (date.toDateString() === now.toDateString()) {
+        return `Today at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+      }
+      const yesterday = new Date(now);
+      yesterday.setDate(now.getDate() - 1);
+      if (date.toDateString() === yesterday.toDateString()) {
+        return `Yesterday at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+      }
+      return date.toLocaleDateString('en-US', { 
+        day: 'numeric', 
+        month: 'short', 
+        year: 'numeric'
+      });
+    };
+  
+    // Fallback for username if createdBy is missing or undefined
+    const username = discussion.createdBy?.username || "Anonymous";
+  
+    return (
+      <div 
+        className="bg-[#151f2a] p-6 rounded-lg shadow-lg cursor-pointer hover:bg-[#1a283a] transition-colors"
+        onClick={onClick}
+      >
+        <div className="flex items-center space-x-4 mb-4">
+          <img
+            src={`https://ui-avatars.com/api/?name=${username}&background=random`}
+            alt={username}
+            className="h-10 w-10 rounded-full"
+          />
+          <div>
+            <h3 className="font-semibold text-white">{username}</h3>
+            <p className="text-sm text-gray-400">
+              {formatDate(discussion.createdAt)}
+            </p>
+          </div>
+        </div>
+  
+        <h2 className="text-xl font-semibold text-white mb-3">
+          {discussion.title}
+        </h2>
+        <div className="text-gray-300 mb-4">
+          {isExpanded || discussion.content.length <= 200 ? (
+            <p>{discussion.content}</p>
+          ) : (
+            <>
+              <p>{discussion.content.substring(0, 200)}...</p>
+              <button 
+                onClick={handleReadMoreClick}
+                className="text-blue-400 hover:text-blue-300 text-sm mt-1"
+              >
+                Read more
+              </button>
+            </>
+          )}
+        </div>
+  
+        <div className="flex items-center space-x-6 text-gray-400">
+          <span className="flex items-center space-x-1">
+            <FaTag className="h-4 w-4" />
+            <span>{discussion.tags && discussion.tags.length > 0 ? discussion.tags[0] : "Competitive Programming"}</span>
+          </span>
+          <button 
+            className="flex items-center space-x-1 hover:text-blue-500 transition-colors"
+            onClick={handleLike}
+            disabled={isLiking}
+          >
+            {liked ? (
+              <FaThumbsUp className="h-4 w-4 text-blue-500" />
+            ) : (
+              <FaRegThumbsUp className="h-4 w-4" />
+            )}
+            <span>{discussion.likes}</span>
+          </button>
+          <span className="flex items-center space-x-1">
+            <FaComment className="h-4 w-4" />
+            <span>{discussion.comments ? discussion.comments.length : 0}</span>
+          </span>
+        </div>
+      </div>
+    );
+  }  return (
     <div className='w-full flex flex-col items-center'>
       <Header />
-      <div className="min-h-screen bg-[#06141D] text-gray-200 p-6 w-full ">
+      <div className="min-h-screen bg-[#06141D] text-gray-200 p-6 w-full">
         {/* Header with group info and start discussion button */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
           <div>
@@ -111,7 +259,13 @@ function DiscussionPage() {
               <h2 className="text-xl font-bold mb-3 text-white">Popular Topics</h2>
               <div className="space-y-2">
                 {popularTopics.map((topic, index) => (
-                  <div key={index} className="bg-[#1a283a] px-3 py-2 rounded-md hover:bg-[#1e3148] cursor-pointer">
+                  <div 
+                    key={index} 
+                    className={`bg-[#1a283a] px-3 py-2 rounded-md cursor-pointer ${
+                      selectedTag === topic ? 'bg-blue-600 text-white' : 'hover:bg-[#1e3148]'
+                    }`}
+                    onClick={() => handleTagFilter(topic)}
+                  >
                     {topic}
                   </div>
                 ))}
@@ -173,6 +327,13 @@ function DiscussionPage() {
               </div>
             </div>
 
+            {/* Error Message */}
+            {error && (
+              <div className="mb-4 p-3 bg-red-900/50 border border-red-500 rounded text-red-200">
+                {error}
+              </div>
+            )}
+
             {/* Discussion Posts */}
             <div className="space-y-6">
               {discussions.length > 0 ? (
@@ -212,74 +373,6 @@ function DiscussionPage() {
         onClose={closeDiscussionDetails}
         fetchDiscussions={fetchDiscussions}
       />
-    </div>
-  );
-}
-
-// Discussion Card Component
-function DiscussionCard({ discussion, onClick }) {
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  const handleReadMoreClick = (e) => {
-    e.stopPropagation(); // Prevent triggering the card click
-    setIsExpanded(true);
-  };
-
-  return (
-    <div 
-      className="bg-[#151f2a] p-6 rounded-lg shadow-lg cursor-pointer hover:bg-[#1a283a] transition-colors"
-      onClick={onClick}
-    >
-      <div className="flex items-center space-x-4 mb-4">
-        <img
-          src={`https://ui-avatars.com/api/?name=${discussion.createdBy.username}&background=random`}
-          alt={discussion.createdBy.username}
-          className="h-10 w-10 rounded-full"
-        />
-        <div>
-          <h3 className="font-semibold text-white">{discussion.createdBy.username}</h3>
-          <p className="text-sm text-gray-400">
-            about {new Date(discussion.createdAt).toLocaleDateString()}
-          </p>
-        </div>
-      </div>
-
-      <h2 className="text-xl font-semibold text-white mb-3">
-        {discussion.title}
-      </h2>
-      <div className="text-gray-300 mb-4">
-        {isExpanded || discussion.content.length <= 200 ? (
-          <p>{discussion.content}</p>
-        ) : (
-          <>
-            <p>{discussion.content.substring(0, 200)}...</p>
-            <button 
-              onClick={handleReadMoreClick}
-              className="text-blue-400 hover:text-blue-300 text-sm mt-1"
-            >
-              Read more
-            </button>
-          </>
-        )}
-      </div>
-
-      <div className="flex items-center space-x-6 text-gray-400">
-        <span className="flex items-center space-x-1">
-          <FaTag className="h-4 w-4" />
-          <span>{discussion.tags && discussion.tags.length > 0 ? discussion.tags[0] : "Competitive Programming"}</span>
-        </span>
-        <button 
-          className="flex items-center space-x-1 hover:text-blue-500 transition-colors"
-          onClick={(e) => e.stopPropagation()} // Prevent triggering the card click
-        >
-          <FaThumbsUp className="h-4 w-4" />
-          <span>{Math.floor(Math.random() * 30)}</span>
-        </button>
-        <span className="flex items-center space-x-1">
-          <FaComment className="h-4 w-4" />
-          <span>{discussion.comments ? discussion.comments.length : 0}</span>
-        </span>
-      </div>
     </div>
   );
 }

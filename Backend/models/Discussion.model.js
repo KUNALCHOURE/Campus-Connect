@@ -19,7 +19,7 @@ const discussionSchema = new mongoose.Schema({
     createdBy: {
         id: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
+            ref: 'user',
             required: true
         },
         username: {
@@ -40,7 +40,7 @@ const discussionSchema = new mongoose.Schema({
             createdBy: {
                 id: {
                     type: mongoose.Schema.Types.ObjectId,
-                    ref: 'User',
+                    ref: 'user',
                     required: true
                 },
                 username: {

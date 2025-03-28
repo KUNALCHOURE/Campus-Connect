@@ -166,6 +166,30 @@ const getcomment=asynchandler(async(req,res)=>{
 
 
 })
+const deletepost = asynchandler(async (req, res) => {
+    const { postid } = req.body;
 
+    // Validate post ID
+    if (!mongoose.Types.ObjectId.isValid(postid)) {
+        throw new Apierror(400, "Invalid post ID");
+    }
 
-export {createpost,getpost,likepost,addcomment,getcomment,unlikepost};
+    // Find the post
+    const currentpost = await post.findById(postid);
+    if (!currentpost) {
+        throw new Apierror(404, "Post not found");
+    }
+
+    // Check if the user is the creator of the post
+    const currentuser = req.user;
+    if (currentpost.createdBy.id.toString() !== currentuser._id.toString()) {
+        throw new Apierror(403, "You are not authorized to delete this post");
+    }
+
+    // Delete the post
+    await post.findByIdAndDelete(postid);
+
+    return res.status(200).json(new Apiresponse(200, {}, "Post deleted successfully"));
+});
+
+export {createpost,getpost,likepost,addcomment,getcomment,unlikepost,deletepost};

@@ -34,39 +34,30 @@ const createDiscussion = asynchandler(async (req, res) => {
 
 // Get all discussions with pagination and filters
 const getDiscussions = asynchandler(async (req, res) => {
-    const { page = 1, limit = 10, tag, search } = req.query;
-    const query = {};
+    try {
+        // Fetch all discussions without any filters or pagination
+        const discussions = await discussion
+            .find() // No query object needed since we're fetching all discussions
+            .populate('createdBy.id', 'username') // Populate the username of the creator
+            .sort({ createdAt: -1 }); // Sort by creation date in descending order
 
-    // Add tag filter if provided
-    if (tag) {
-        query.tags = tag;
-    }
+        console.log("Discussions:", discussions); // Log the fetched discussions for debugging
 
-    // Add search filter if provided
-    if (search) {
-        query.$or = [
-            { title: { $regex: search, $options: 'i' } },
-            { content: { $regex: search, $options: 'i' } }
-        ];
-    }
+        // Count the total number of discussions
+        const total = await discussion.countDocuments();
 
-    const discussions = await discussion.find(query)
-        .populate('createdBy.id', 'username')
-        .sort({ createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(limit);
-
-    const total = await discussion.countDocuments(query);
-
-    return res.status(200)
-        .json(new Apiresponse(200, {
+        // Return the response with discussions and total count
+        return res.status(200).json(new Apiresponse(200, {
             discussions,
             total,
-            pages: Math.ceil(total / limit),
-            currentPage: page
+            pages: 1, // Since we're fetching all discussions, there's only 1 "page"
+            currentPage: 1
         }, "Discussions fetched successfully"));
+    } catch (error) {
+        console.error("Error in getDiscussions:", error);
+        throw new Apierror(500, "Error fetching discussions");
+    }
 });
-
 // Get a single discussion by ID
 const getDiscussionById = asynchandler(async (req, res) => {
     const { discussionId } = req.params;
