@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import Flowchart from './Flowchart';
 
 function Search() {
@@ -8,33 +8,30 @@ function Search() {
   const [on, setOn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const generatemap = () => {
-    if (input) {
-      setIsLoading(true);
-      let data = JSON.stringify({
-        topic: ` ${input}`
+  const generatemap = async () => {
+    if (!input.trim()) {
+      alert('Input cannot be empty');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await api.post('/roadmap/generate', {
+        topic: input.trim()
       });
 
-      let config = {
-        method: 'post',
-        maxBodyLength: Infinity,
-        url: 'https://roadmap-be.vercel.app/v1',
-        headers: { 'Content-Type': 'application/json' },
-        data: data
-      };
-
-      axios.request(config)
-        .then((response) => {
-          setOutput(response.data);
-          setOn(true);
-          setIsLoading(false);
-        })
-        .catch((error) => {
-          setOn(false);
-          setIsLoading(false);
-        });
-    } else {
-      alert('Input cannot be empty');
+      if (response.data.success) {
+        setOutput(response.data.data);
+        setOn(true);
+      } else {
+        alert('Failed to generate roadmap. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error generating roadmap:', error);
+      alert('An error occurred while generating the roadmap. Please try again.');
+      setOn(false);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -50,22 +47,28 @@ function Search() {
       <div className='flex flex-row gap-4'>
         <input
           type="text"
+          value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Enter topic to get a roadmap"
           className="p-3 text-lg rounded-lg w-80 max-w-full shadow-md bg-transparent text-white border border-white focus:outline-none focus:shadow-lg transition-shadow"
         />
         <button
           onClick={generatemap}
-          className="px-2 text-lg text-white bg-transparent rounded-lg border border-white hover:text-[#06141D] hover:bg-white transition-colors"
+          disabled={isLoading}
+          className={`px-4 py-2 text-lg text-white rounded-lg border border-white transition-colors ${
+            isLoading 
+              ? 'opacity-50 cursor-not-allowed'
+              : 'hover:text-[#06141D] hover:bg-white'
+          }`}
         >
           {isLoading ? 'Generating...' : 'Generate Roadmap'}
         </button>
       </div>
       
-      {on ? <Flowchart map={output} /> : ''}
+      {on && output && <Flowchart map={output} />}
 
       {/* Button to trigger the print dialog */}
-      {on && (
+      {on && output && (
         <button
           onClick={printPage}
           className="mt-8 px-4 py-2 text-lg text-white bg-blue-600 rounded-lg hover:bg-blue-800 transition-colors"

@@ -174,6 +174,7 @@ const addComment = asynchandler(async (req, res) => {
 });
 const toggleLike = asynchandler(async (req, res) => {
     const { discussionId } = req.params;
+    const userId = req.user._id;
 
     if (!mongoose.Types.ObjectId.isValid(discussionId)) {
         throw new Apierror(400, "Invalid discussion ID");
@@ -184,34 +185,90 @@ const toggleLike = asynchandler(async (req, res) => {
         throw new Apierror(404, "Discussion not found");
     }
 
-    const currentUser = req.user;
-
     // Initialize likedDiscussions array if it doesn't exist
-    if (!currentUser.likedDiscussions) {
-        currentUser.likedDiscussions = [];
+    if (!req.user.likedDiscussions) {
+        req.user.likedDiscussions = [];
     }
 
     // Check if the user has already liked the discussion
-    const userLiked = currentUser.likedDiscussions.some(id => id.toString() === discussionId.toString());
+    const userLiked = req.user.likedDiscussions.some(id => id.toString() === discussionId.toString());
 
     if (userLiked) {
         // Unlike: Decrease likes count and remove from user's likedDiscussions
         currentDiscussion.likes = Math.max(0, currentDiscussion.likes - 1);
-        currentUser.likedDiscussions = currentUser.likedDiscussions.filter(id => id.toString() !== discussionId.toString());
+        req.user.likedDiscussions = req.user.likedDiscussions.filter(id => id.toString() !== discussionId.toString());
     } else {
         // Like: Increase likes count and add to user's likedDiscussions
         currentDiscussion.likes += 1;
-        currentUser.likedDiscussions.push(discussionId);
+        req.user.likedDiscussions.push(discussionId);
     }
 
     await currentDiscussion.save();
-    await currentUser.save();
+    await req.user.save();
 
     return res.status(200).json(new Apiresponse(200, {
         likes: currentDiscussion.likes,
         liked: !userLiked
     }, userLiked ? "Discussion unliked successfully" : "Discussion liked successfully"));
 });
+
+// Get like status for a discussion
+const getLikeStatus = asynchandler(async (req, res) => {
+    const { discussionId } = req.params;
+    const userId = req.user._id;
+
+    if (!mongoose.Types.ObjectId.isValid(discussionId)) {
+        throw new Apierror(400, "Invalid discussion ID");
+    }
+
+    const discussion = await discussion.findById(discussionId);
+    if (!discussion) {
+        throw new Apierror(404, "Discussion not found");
+    }
+
+    // Initialize likedDiscussions array if it doesn't exist
+    if (!req.user.likedDiscussions) {
+        req.user.likedDiscussions = [];
+    }
+
+    const liked = req.user.likedDiscussions.some(id => id.toString() === discussionId.toString());
+
+    return res.status(200).json(new Apiresponse(200, { 
+        liked,
+        likes: discussion.likes
+    }, "Like status fetched successfully"));
+});
+
+// Delete a comment
+const deleteComment = asynchandler(async (req, res) => {
+    const { discussionId, commentId } = req.params;
+    const userId = req.user._id;
+
+    if (!mongoose.Types.ObjectId.isValid(discussionId) || !mongoose.Types.ObjectId.isValid(commentId)) {
+        throw new Apierror(400, "Invalid discussion or comment ID");
+    }
+
+    const discussion = await discussion.findById(discussionId);
+    if (!discussion) {
+        throw new Apierror(404, "Discussion not found");
+    }
+
+    const comment = discussion.comments.id(commentId);
+    if (!comment) {
+        throw new Apierror(404, "Comment not found");
+    }
+
+    // Check if user is the comment creator
+    if (comment.createdBy.id.toString() !== userId.toString()) {
+        throw new Apierror(403, "You can only delete your own comments");
+    }
+
+    comment.remove();
+    await discussion.save();
+
+    return res.status(200).json(new Apiresponse(200, {}, "Comment deleted successfully"));
+});
+
 export {
     createDiscussion,
     getDiscussions,
@@ -219,5 +276,7 @@ export {
     updateDiscussion,
     deleteDiscussion,
     addComment,
-    toggleLike
+    toggleLike,
+    getLikeStatus,
+    deleteComment
 };

@@ -28,6 +28,10 @@ const Userschema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'post'  
     }],
+    likedDiscussions: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Discussion'
+    }],
     preferences: [{
         type: String
     }]

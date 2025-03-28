@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../services/api';
-import { FaTimes, FaThumbsUp, FaRegThumbsUp, FaComment, FaTag, FaUser, FaEdit, FaTrash } from "react-icons/fa";
+import { FaTimes, FaThumbsUp, FaRegThumbsUp, FaComment, FaTag, FaUser, FaEdit, FaTrash, FaSave } from "react-icons/fa";
 import { useAuth } from '../utils/autcontext';
 
 function DiscussionDetails({ discussion, isOpen, onClose, fetchDiscussions }) {
@@ -9,8 +9,29 @@ function DiscussionDetails({ discussion, isOpen, onClose, fetchDiscussions }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
     const [isLiking, setIsLiking] = useState(false);
-    const [liked, setLiked] = useState(user?.likedDiscussions?.includes(discussion._id) || false);
-    const [likeCount, setLikeCount] = useState();
+    const [liked, setLiked] = useState(false);
+    const [likeCount, setLikeCount] = useState(0);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editForm, setEditForm] = useState({
+        title: '',
+        content: '',
+        tags: ''
+    });
+    const [localDiscussion, setLocalDiscussion] = useState(null);
+
+    // Update local state when discussion changes
+    useEffect(() => {
+        if (discussion) {
+            setLocalDiscussion(discussion);
+            setEditForm({
+                title: discussion.title || '',
+                content: discussion.content || '',
+                tags: (discussion.tags || []).join(', ')
+            });
+            setLiked(user?.likedDiscussions?.includes(discussion._id) || false);
+            setLikeCount(discussion.likes || 0);
+        }
+    }, [discussion, user]);
 
     if (!isOpen || !discussion) return null;
 
@@ -43,9 +64,15 @@ function DiscussionDetails({ discussion, isOpen, onClose, fetchDiscussions }) {
         setError('');
 
         try {
-            await api.post(`/discussion/${discussion._id}/comments`, { text: commentText });
+            const response = await api.post(`/discussion/${discussion._id}/comments`, { text: commentText });
+            // Update local state immediately
+            setLocalDiscussion(prev => ({
+                ...prev,
+                comments: [...(prev.comments || []), response.data.data.comments[response.data.data.comments.length - 1]]
+            }));
             setCommentText('');
-            fetchDiscussions(); // Refresh discussions to reflect new comment
+            // Also update parent state
+            fetchDiscussions();
         } catch (error) {
             setError(error.response?.data?.message || 'Failed to post comment');
             console.error('Error posting comment:', error);
@@ -59,9 +86,15 @@ function DiscussionDetails({ discussion, isOpen, onClose, fetchDiscussions }) {
         setIsLiking(true);
         try {
             const response = await api.post(`/discussion/${discussion._id}/like`);
+            // Update local state
             setLiked(response.data.data.liked);
             setLikeCount(response.data.data.likes);
-            fetchDiscussions(); // Refresh parent data to reflect updated like count
+            setLocalDiscussion(prev => ({
+                ...prev,
+                likes: response.data.data.likes
+            }));
+            // Update parent state
+            fetchDiscussions();
         } catch (error) {
             console.error('Error toggling like:', error);
             setError(error.response?.data?.message || 'Failed to toggle like');
@@ -84,33 +117,97 @@ function DiscussionDetails({ discussion, isOpen, onClose, fetchDiscussions }) {
     };
 
     const handleEdit = () => {
-        alert("Edit functionality can be implemented by opening a modal or redirecting to an edit page.");
-        // You can extend this to open an edit modal or redirect to an edit page
+        setIsEditing(true);
+    };
+
+    const handleEditChange = (e) => {
+        const { name, value } = e.target;
+        setEditForm(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSaveEdit = async () => {
+        setIsSubmitting(true);
+        setError('');
+
+        try {
+            const formattedTags = editForm.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+            const response = await api.put(`/discussion/${discussion._id}`, {
+                title: editForm.title,
+                content: editForm.content,
+                tags: formattedTags
+            });
+            
+            setIsEditing(false);
+            // Update local state
+            setLocalDiscussion(response.data.data);
+            // Update parent state
+            fetchDiscussions();
+        } catch (error) {
+            setError(error.response?.data?.message || 'Failed to update discussion');
+            console.error('Error updating discussion:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleCancelEdit = () => {
+        setIsEditing(false);
+        setEditForm({
+            title: discussion.title || '',
+            content: discussion.content || '',
+            tags: (discussion.tags || []).join(', ')
+        });
+        setError('');
     };
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 px-4 overflow-y-auto">
-            <div className="bg-[#151f2a] rounded-lg w-full max-w-4xl my-8 relative overflow-hidden">
+            <div className="bg-[#151f2a] rounded-lg w-full max-w-4xl my-8 relative overflow-hidden flex flex-col h-[90vh]">
                 {/* Header */}
-                <div className="flex justify-between items-center p-6 border-b border-gray-700 sticky top-0 bg-[#151f2a]">
+                <div className="flex justify-between items-center p-6 border-b border-gray-700 sticky top-0 bg-[#151f2a] z-10">
                     <h2 className="text-xl font-semibold text-white">Discussion</h2>
                     <div className="flex items-center space-x-2">
                         {user && user._id === discussion.createdBy.id.toString() && (
                             <>
-                                <button 
-                                    onClick={handleEdit}
-                                    className="text-gray-400 hover:text-blue-500 transition-colors"
-                                    title="Edit Discussion"
-                                >
-                                    <FaEdit />
-                                </button>
-                                <button 
-                                    onClick={handleDelete}
-                                    className="text-gray-400 hover:text-red-500 transition-colors"
-                                    title="Delete Discussion"
-                                >
-                                    <FaTrash />
-                                </button>
+                                {isEditing ? (
+                                    <>
+                                        <button 
+                                            onClick={handleSaveEdit}
+                                            disabled={isSubmitting}
+                                            className="text-gray-400 hover:text-green-500 transition-colors"
+                                            title="Save Changes"
+                                        >
+                                            <FaSave />
+                                        </button>
+                                        <button 
+                                            onClick={handleCancelEdit}
+                                            className="text-gray-400 hover:text-yellow-500 transition-colors"
+                                            title="Cancel Edit"
+                                        >
+                                            <FaTimes />
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <button 
+                                            onClick={handleEdit}
+                                            className="text-gray-400 hover:text-blue-500 transition-colors"
+                                            title="Edit Discussion"
+                                        >
+                                            <FaEdit />
+                                        </button>
+                                        <button 
+                                            onClick={handleDelete}
+                                            className="text-gray-400 hover:text-red-500 transition-colors"
+                                            title="Delete Discussion"
+                                        >
+                                            <FaTrash />
+                                        </button>
+                                    </>
+                                )}
                             </>
                         )}
                         <button 
@@ -122,8 +219,8 @@ function DiscussionDetails({ discussion, isOpen, onClose, fetchDiscussions }) {
                     </div>
                 </div>
 
-                {/* Discussion Content */}
-                <div className="p-6">
+                {/* Main Content */}
+                <div className="flex-1 overflow-y-auto p-6">
                     <div className="flex items-center space-x-4 mb-6">
                         <img
                             src={`https://ui-avatars.com/api/?name=${discussion.createdBy.username}&background=random`}
@@ -139,25 +236,59 @@ function DiscussionDetails({ discussion, isOpen, onClose, fetchDiscussions }) {
                     </div>
 
                     <div className="mb-8">
-                        <h1 className="text-2xl font-bold text-white mb-4">{discussion.title}</h1>
-                        <p className="text-gray-300 whitespace-pre-line">{discussion.content}</p>
-                        
-                        {discussion.tags && discussion.tags.length > 0 && (
-                            <div className="flex flex-wrap mt-4 gap-2">
-                                {discussion.tags.map((tag, index) => (
-                                    <div key={index} className="bg-blue-900/30 text-blue-300 px-3 py-1 rounded-full text-sm flex items-center space-x-1">
-                                        <FaTag className="h-3 w-3" />
-                                        <span>{tag}</span>
-                                    </div>
-                                ))}
+                        {isEditing ? (
+                            <div className="space-y-4">
+                                <input
+                                    type="text"
+                                    name="title"
+                                    value={editForm.title}
+                                    onChange={handleEditChange}
+                                    className="w-full p-3 bg-[#0d1520] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                                <textarea
+                                    name="content"
+                                    value={editForm.content}
+                                    onChange={handleEditChange}
+                                    className="w-full p-3 bg-[#0d1520] border border-gray-700 rounded-md text-white min-h-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                                <input
+                                    type="text"
+                                    name="tags"
+                                    value={editForm.tags}
+                                    onChange={handleEditChange}
+                                    placeholder="Enter tags (comma separated)"
+                                    className="w-full p-3 bg-[#0d1520] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                                {error && (
+                                    <div className="text-red-500 text-sm">{error}</div>
+                                )}
                             </div>
+                        ) : (
+                            <>
+                                <h1 className="text-2xl font-bold text-white mb-4">{discussion.title}</h1>
+                                <p className="text-gray-300 whitespace-pre-line">{discussion.content}</p>
+                                
+                                {discussion.tags && discussion.tags.length > 0 && (
+                                    <div className="flex flex-wrap mt-4 gap-2">
+                                        {discussion.tags.map((tag, index) => (
+                                            <div key={index} className="bg-blue-900/30 text-blue-300 px-3 py-1 rounded-full text-sm flex items-center space-x-1">
+                                                <FaTag className="h-3 w-3" />
+                                                <span>{tag}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </>
                         )}
                         
                         <div className="flex items-center space-x-8 mt-6 text-gray-400">
                             <button 
                                 onClick={handleLike}
                                 disabled={isLiking || !user}
-                                className="flex items-center space-x-2 hover:text-blue-500 transition-colors"
+                                className={`flex items-center space-x-2 transition-colors ${
+                                    liked ? 'text-blue-500' : 'hover:text-blue-500'
+                                }`}
+                                title={liked ? "Unlike discussion" : "Like discussion"}
                             >
                                 {liked ? (
                                     <FaThumbsUp className="text-blue-500" />
@@ -168,7 +299,7 @@ function DiscussionDetails({ discussion, isOpen, onClose, fetchDiscussions }) {
                             </button>
                             <div className="flex items-center space-x-2">
                                 <FaComment className="h-4 w-4" />
-                                <span>{discussion.comments ? discussion.comments.length : 0} comments</span>
+                                <span>{localDiscussion?.comments?.length || 0} comments</span>
                             </div>
                         </div>
                     </div>
@@ -204,9 +335,9 @@ function DiscussionDetails({ discussion, isOpen, onClose, fetchDiscussions }) {
                             </div>
                         </form>
 
-                        <div className="space-y-4">
-                            {discussion.comments && discussion.comments.length > 0 ? (
-                                discussion.comments.map((comment, index) => (
+                        <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                            {localDiscussion?.comments && localDiscussion.comments.length > 0 ? (
+                                localDiscussion.comments.map((comment, index) => (
                                     <div key={index} className="bg-[#1a283a] p-4 rounded-lg">
                                         <div className="flex items-center space-x-3 mb-2">
                                             <div className="bg-gray-700 h-8 w-8 rounded-full flex items-center justify-center">

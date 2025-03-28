@@ -7,7 +7,9 @@ import {
     updateDiscussion,
     deleteDiscussion,
     addComment,
-    toggleLike
+    toggleLike,
+    getLikeStatus,
+    deleteComment
 } from "../controllers/discussion.controllers.js";
 
 const router = Router();
@@ -29,8 +31,14 @@ router.route("/:discussionId")
 router.route("/:discussionId/comments")
     .post(addComment);
 
+router.route("/:discussionId/comments/:commentId")
+    .delete(deleteComment);
+
 // Like routes
 router.route("/:discussionId/like")
     .post(toggleLike);
+
+router.route("/:discussionId/like-status")
+    .get(getLikeStatus);
 
 export default router;
