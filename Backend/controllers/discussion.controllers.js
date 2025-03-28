@@ -186,17 +186,18 @@ const toggleLike = asynchandler(async (req, res) => {
 
     const currentUser = req.user;
 
-    // Check if the user has already liked the discussion
+    // Initialize likedDiscussions array if it doesn't exist
     if (!currentUser.likedDiscussions) {
-        currentUser.likedDiscussions = []; // Initialize if not present
+        currentUser.likedDiscussions = [];
     }
 
-    const userLiked = currentUser.likedDiscussions.includes(discussionId);
+    // Check if the user has already liked the discussion
+    const userLiked = currentUser.likedDiscussions.some(id => id.toString() === discussionId.toString());
 
     if (userLiked) {
         // Unlike: Decrease likes count and remove from user's likedDiscussions
-        currentDiscussion.likes -= 1;
-        currentUser.likedDiscussions = currentUser.likedDiscussions.filter(id => id.toString() !== discussionId);
+        currentDiscussion.likes = Math.max(0, currentDiscussion.likes - 1);
+        currentUser.likedDiscussions = currentUser.likedDiscussions.filter(id => id.toString() !== discussionId.toString());
     } else {
         // Like: Increase likes count and add to user's likedDiscussions
         currentDiscussion.likes += 1;

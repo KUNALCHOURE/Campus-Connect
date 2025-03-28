@@ -10,7 +10,7 @@ function DiscussionDetails({ discussion, isOpen, onClose, fetchDiscussions }) {
     const [error, setError] = useState('');
     const [isLiking, setIsLiking] = useState(false);
     const [liked, setLiked] = useState(user?.likedDiscussions?.includes(discussion._id) || false);
-    const [likeCount, setLikeCount] = useState(discussion.likes);
+    const [likeCount, setLikeCount] = useState();
 
     if (!isOpen || !discussion) return null;
 

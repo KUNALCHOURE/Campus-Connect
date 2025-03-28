@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { FaTimes } from "react-icons/fa";
+import api from '../services/api';
 
 function DiscussionModal({ isOpen, onClose, fetchDiscussions }) {
   const [title, setTitle] = useState("");
@@ -17,20 +18,15 @@ function DiscussionModal({ isOpen, onClose, fetchDiscussions }) {
     setError("");
 
     try {
-      const token = localStorage.getItem("token");
-      const formattedTags = tags.split(",").map(tag => tag.trim());
+      const formattedTags = tags.split(",").map(tag => tag.trim()).filter(tag => tag.length > 0);
 
-      await axios.post(
-        'http://localhost:5000/api/discussions', 
-        { title, content, tags: formattedTags },
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-      
+      const response = await api.post('/discussion', {
+        title,
+        content,
+        tags: formattedTags
+      });
+      console.log(response);
+
       // Reset form and close modal
       setTitle("");
       setContent("");

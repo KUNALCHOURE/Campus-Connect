@@ -1,3 +1,4 @@
+
 // // import React, { useState } from 'react';
 // // import axios from 'axios';
 
@@ -154,12 +155,13 @@ function DiscussionInput({ fetchDiscussions }) {
 
     try {
       const formattedTags = tags.split(",").map(tag => tag.trim()).filter(tag => tag);
-      await api.post('/discussion', { 
+      let res= await api.post('/discussion', { 
         title, 
         content, 
         tags: formattedTags 
       });
       
+      console.log(res);
       setTitle("");
       setContent("");
       setTags("");

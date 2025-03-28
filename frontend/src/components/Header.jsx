@@ -128,7 +128,7 @@ function Header() {
           >
             <motion.img
               whileHover={{ scale: 1.08 }}
-              src={profile}
+              src={`https://ui-avatars.com/api/?name=${user.username}&background=random`}
               alt="Profile"
               className="w-8 h-8 rounded-full border border-accent/50"
             />
