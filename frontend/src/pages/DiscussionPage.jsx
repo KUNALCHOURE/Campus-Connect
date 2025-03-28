@@ -244,21 +244,6 @@ function DiscussionPage() {
               </div>
             </div>
 
-            {/* Upcoming Contests */}
-            <div className="bg-[#151f2a] p-4 rounded-lg">
-              <h2 className="text-xl font-bold mb-3 text-white">Upcoming Contests</h2>
-              <div className="space-y-3">
-                {upcomingContests.map((contest, index) => (
-                  <div key={index} className="flex items-start">
-                    <span className="text-yellow-500 mr-2">🏆</span>
-                    <div>
-                      <div className="font-semibold">{contest.name}</div>
-                      <div className="text-sm text-gray-400">{contest.platform} • {contest.division}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
 
           {/* Main Content Area */}
@@ -283,7 +268,7 @@ function DiscussionPage() {
               </div>
 
               {/* Quick Action Buttons */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <button className="flex items-center justify-center space-x-2 p-3 bg-[#151f2a] rounded-lg hover:bg-[#1a283a]">
                   <span className="text-blue-500">⟨⟩</span>
                   <span>Share Solution</span>
@@ -296,7 +281,7 @@ function DiscussionPage() {
                   <FaClock className="h-5 w-5 text-purple-500" />
                   <span>Practice Timer</span>
                 </button>
-              </div>
+              </div> */}
             </div>
 
             {/* Error Message */}

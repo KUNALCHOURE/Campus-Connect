@@ -1,13 +1,17 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const OpenAI = require('openai');
-const multer = require('multer');
-const path = require('path');
-const app = express();
-const port = 5000;
+import OpenAI from 'openai';
+import multer from 'multer';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import dotenv from 'dotenv';
 
-// Configure OpenAI
+// Load environment variables
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Configure OpenAI with explicit API key
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
 });
@@ -19,18 +23,13 @@ const storage = multer.diskStorage({
         cb(null, 'image-' + Date.now() + path.extname(file.originalname));
     }
 });
+
 const upload = multer({
     storage: storage,
     limits: { fileSize: 10000000 } // 10MB limit
 });
 
-// Middleware
-app.use(cors());
-app.use(express.json());
-app.use('/uploads', express.static('uploads')); // Serve uploaded images
-
-// Chat endpoint
-app.post('/chat', async (req, res) => {
+export const chat = async (req, res) => {
     try {
         const userMessage = req.body.message;
 
@@ -60,16 +59,15 @@ app.post('/chat', async (req, res) => {
             error: 'Something went wrong'
         });
     }
-});
+};
 
-// Image upload endpoint
-app.post('/upload-image', upload.single('image'), async (req, res) => {
+export const uploadImage = async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: 'No image file uploaded' });
         }
 
-        const imageUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+        const imageUrl = `${process.env.BACKEND_URL}/uploads/${req.file.filename}`;
         res.json({
             success: true,
             imageUrl: imageUrl
@@ -78,13 +76,10 @@ app.post('/upload-image', upload.single('image'), async (req, res) => {
         console.error('Error uploading image:', error);
         res.status(500).json({ error: 'Failed to upload image' });
     }
-});
+};
 
-// Image analysis endpoint
-app.post('/analyze-image', async (req, res) => {
+export const analyzeImage = async (req, res) => {
     try {
-        // Here you can add image analysis logic
-        // For now, sending a simple response
         res.json({
             response: "I can see the image you uploaded. What would you like to know about it?"
         });
@@ -92,9 +87,4 @@ app.post('/analyze-image', async (req, res) => {
         console.error('Error analyzing image:', error);
         res.status(500).json({ error: 'Failed to analyze image' });
     }
-});
-
-// Start the server
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-});
+}; 

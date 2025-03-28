@@ -12,6 +12,7 @@ import DiscussionPage from "./pages/DiscussionPage";
 import ResourcesPage from "./pages/ResourcePage";
 import RecommendationTest from "./pages/RecommendationTest";
 import LandingPage from "./pages/landingpage";
+import ChatBotPage from "./pages/ChatBotPage";
 
 function App() {
   const [loading, setLoading] = useState(false);
@@ -28,57 +29,62 @@ function App() {
   }
 
   return (
-    
-        <Routes>
-      {/* ✅ Protected Routes */}
-      <Route
-        path="/Home"
-        element={
-          <ProtectedRoute>
-            <HomePage />
-          </ProtectedRoute>
-        }
-      />
+    <>
+      <Routes>
+        {/* ✅ Protected Routes */}
+        <Route
+          path="/Home"
+          element={
+            <ProtectedRoute>
+              <HomePage />
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-       path="/"
-       element={
-       
-        <LandingPage/>
-     
-       }
-      />
-      <Route
-        path="/roadmap"
-        element={
-          <ProtectedRoute>
-            <Roadmap />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/discussion"
-        element={
-          <ProtectedRoute>
-            <DiscussionPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/resources"
-        element={
-          <ProtectedRoute>
-            <ResourcesPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route path="/rcmd" element={<RecommendationTest />} />
+        <Route
+         path="/"
+         element={
+          <LandingPage/>
+         }
+        />
+        <Route
+          path="/roadmap"
+          element={
+            <ProtectedRoute>
+              <Roadmap />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/discussion"
+          element={
+            <ProtectedRoute>
+              <DiscussionPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/resources"
+          element={
+            <ProtectedRoute>
+              <ResourcesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/chatbot"
+          element={
+            <ProtectedRoute>
+              <ChatBotPage />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* ✅ Public Routes */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-    </Routes>
-
+        {/* ✅ Public Routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+      </Routes>
+    </>
   );
 }
 
