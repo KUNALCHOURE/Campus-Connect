@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { AiFillLike, AiOutlineLike } from "react-icons/ai";
 import { FaRegComment, FaUserCircle } from "react-icons/fa";
 import { IoTimeOutline, IoSend, IoEllipsisHorizontal } from "react-icons/io5";
-import { FaTrash } from "react-icons/fa"; // Add trash icon for delete
+import { FaTrash } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "../services/api";
 import { useAuth } from "../utils/autcontext";
@@ -136,6 +136,9 @@ function Post({ postId, avatar, createdBy, title, content, likes, comments: init
     }
   };
 
+  // Check if the current user is the post creator
+  const isPostCreator = user && createdBy && user._id === createdBy._id;
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 20 }}
@@ -185,7 +188,7 @@ function Post({ postId, avatar, createdBy, title, content, likes, comments: init
             </div>
             <div className="flex items-center space-x-2">
               {/* Delete Button (only visible to the post creator) */}
-              {user && user._id === createdBy.id._id.toString() && (
+              {isPostCreator && (
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -201,61 +204,35 @@ function Post({ postId, avatar, createdBy, title, content, likes, comments: init
               </button>
             </div>
           </div>
-          
-          <motion.h2
-            initial={{ y: -5, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="text-xl font-semibold mt-3 mb-2 text-text-primary"
-          >
-            {title}
-          </motion.h2>
         </div>
       </div>
 
       {/* Post Content */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
-        className="mt-4 mb-5 text-text-secondary leading-relaxed"
-      >
-        <p className="whitespace-pre-line">{content}</p>
-      </motion.div>
+      <div className="mt-4">
+        <h2 className="text-xl font-semibold text-text-primary mb-2">{title}</h2>
+        <p className="text-text-secondary whitespace-pre-wrap">{content}</p>
+      </div>
 
       {/* Post Actions */}
-      <div className="flex items-center justify-between border-t border-card-border pt-4">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+      <div className="mt-4 flex items-center space-x-4">
+        <button
           onClick={isLiked ? handleremovelike : handleLike}
-          className={`flex items-center space-x-2 px-3 py-1.5 rounded-full ${
-            isLiked 
-              ? "text-accent bg-accent/10" 
-              : "text-text-muted hover:text-accent hover:bg-accent/5"
-          } transition-all duration-300`}
+          className="flex items-center space-x-1 text-text-muted hover:text-accent transition-colors"
         >
           {isLiked ? (
-            <AiFillLike className={`text-lg ${isLiked ? "animate-pulse-custom" : ""}`} />
+            <AiFillLike className="text-accent" />
           ) : (
-            <AiOutlineLike className="text-lg" />
+            <AiOutlineLike />
           )}
-          <span className="text-sm font-medium">{likeCount}</span>
-        </motion.button>
-
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          <span>{likeCount}</span>
+        </button>
+        <button
           onClick={() => setShowComments(!showComments)}
-          className={`flex items-center space-x-2 px-3 py-1.5 rounded-full transition-all duration-300 ${
-            showComments 
-              ? "text-accent bg-accent/10" 
-              : "text-text-muted hover:text-accent hover:bg-accent/5"
-          }`}
+          className="flex items-center space-x-1 text-text-muted hover:text-accent transition-colors"
         >
-          <FaRegComment className="text-lg" />
-          <span className="text-sm font-medium">{comments.length}</span>
-        </motion.button>
+          <FaRegComment />
+          <span>{comments.length}</span>
+        </button>
       </div>
 
       {/* Comments Section */}
@@ -265,83 +242,49 @@ function Post({ postId, avatar, createdBy, title, content, likes, comments: init
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className="mt-4"
+            className="mt-4 border-t border-card-border pt-4"
           >
-            <div className="border-t border-card-border my-3"></div>
-            
-            <form onSubmit={handleCommentSubmit} className="flex items-end space-x-2 mb-4">
-              <div className="flex-1">
-                <textarea
-                  value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
-                  placeholder="Write a comment..."
-                  className="w-full bg-input text-text-primary border border-card-border rounded-lg p-3 min-h-[80px] focus:ring-2 focus:ring-accent/40 focus:border-accent resize-none"
-                />
-              </div>
-              
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+            {/* Comment Input */}
+            <form onSubmit={handleCommentSubmit} className="flex items-center space-x-2 mb-4">
+              <input
+                type="text"
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                placeholder="Write a comment..."
+                className="flex-1 bg-card border border-card-border rounded-full px-4 py-2 text-text-primary focus:outline-none focus:border-accent"
+                disabled={submittingComment}
+              />
+              <button
                 type="submit"
                 disabled={submittingComment || !commentText.trim()}
-                className={`flex items-center justify-center bg-accent hover:bg-accent-hover text-white rounded-lg p-3 h-10 w-10 ${
-                  submittingComment || !commentText.trim() ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                className="text-accent hover:text-accent-light transition-colors"
               >
                 <IoSend />
-              </motion.button>
+              </button>
             </form>
-            
-            <motion.div 
-              className="space-y-4 mt-4 max-h-96 overflow-y-auto pr-2"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-            >
-              {comments.length > 0 ? (
-                comments.map((comment, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="bg-card rounded-lg p-3 flex gap-3"
-                  >
-                    <div className="flex-shrink-0">
-                      {comment.createdBy?.username ? (
-                        <img 
-                          src={`https://ui-avatars.com/api/?name=${comment.createdBy.username}&background=random`} 
-                          alt={`${comment.createdBy.username}'s avatar`} 
-                          className="w-8 h-8 rounded-full object-cover"
-                        />
-                      ) : (
-                        <FaUserCircle className="w-8 h-8 text-text-muted" />
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start">
-                        <h4 className="font-medium text-text-primary text-sm">
-                          {comment.createdBy?.username || "Unknown User"}
-                        </h4>
-                        <span className="text-xs text-text-muted">
-                          {formatCommentDate(comment.createdAt)}
-                        </span>
+
+            {/* Comments List */}
+            <div className="space-y-4">
+              {comments.map((comment, index) => (
+                <div key={index} className="flex items-start space-x-3">
+                  <img
+                    src={`https://ui-avatars.com/api/?name=${comment.createdBy.username}&background=random`}
+                    alt={`${comment.createdBy.username}'s avatar`}
+                    className="w-8 h-8 rounded-full"
+                  />
+                  <div className="flex-1">
+                    <div className="bg-card rounded-lg p-3">
+                      <p className="text-text-primary text-sm">{comment.text}</p>
+                      <div className="flex items-center text-text-muted text-xs mt-1">
+                        <span>{comment.createdBy.username}</span>
+                        <span className="mx-1">•</span>
+                        <span>{formatCommentDate(comment.createdAt)}</span>
                       </div>
-                      <p className="text-text-secondary text-sm mt-1">{comment.text}</p>
                     </div>
-                  </motion.div>
-                ))
-              ) : (
-                <motion.p 
-                  className="text-center text-text-muted py-4"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                >
-                  No comments yet. Be the first to comment!
-                </motion.p>
-              )}
-            </motion.div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

@@ -6,7 +6,7 @@ import asynchandler from "../utils/asynchandler.js";
 const verifyjwt =asynchandler(async(req,_,next)=>{
 try{
     const token=req.cookies?.accesstoken ||req.header("Authorization")?.replace("Bearer ","");
-
+console.log(token);
     if(!token){
         throw new Apierror(401,"Token is missing");
 

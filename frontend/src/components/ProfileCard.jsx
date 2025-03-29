@@ -16,6 +16,7 @@ function ProfileCard() {
         const posts = response.data.data;
         // Filter posts created by the current user
         const userPosts = posts.filter((post) => post.createdBy.id === user._id);
+        console.log(userPosts.length);
         setPostCount(userPosts.length);
       } catch (error) {
         console.error("Error fetching post count:", error);

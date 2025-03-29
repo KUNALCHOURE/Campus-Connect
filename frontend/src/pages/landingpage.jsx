@@ -3,7 +3,7 @@ import { useAuth } from "../utils/autcontext";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { FaLinkedin, FaUsers, FaRoad, FaTrophy, FaComments, FaCalendarAlt, FaChartLine, FaArrowRight, FaCheck, FaTimes, FaStar, FaGraduationCap, FaQuestionCircle } from "react-icons/fa";
 import { useEffect, useRef, useState } from "react";
-
+import logo from "../../public/logo.jpg"
 export default function LandingPage() {
   const { user } = useAuth();
   const { scrollYProgress } = useScroll();
@@ -75,9 +75,11 @@ export default function LandingPage() {
           animate={{ opacity: 1, x: 0 }}
           className="flex items-center gap-2"
         >
-          <div className="w-10 h-10 bg-[#4B7BF5] rounded-lg flex items-center justify-center text-2xl font-bold">
-            C
-          </div>
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center text-2xl font-bold">
+  <img src={logo} alt="Logo" className="w-full h-full object-cover rounded-lg" />
+</div>
+
+          
           <span className="text-xl font-semibold">CampusConnect</span>
         </motion.div>
         <motion.div
@@ -85,17 +87,14 @@ export default function LandingPage() {
           animate={{ opacity: 1, x: 0 }}
           className="flex items-center gap-8"
         >
-          <Link to="/features" className="text-gray-300 hover:text-white transition-colors">Features</Link>
-          <Link to="/testimonials" className="text-gray-300 hover:text-white transition-colors">Testimonials</Link>
-          <Link to="/about" className="text-gray-300 hover:text-white transition-colors">About</Link>
-          <Link to="/faq" className="text-gray-300 hover:text-white transition-colors">FAQ</Link>
+         
           {user ? (
             <Link to="/home" className="bg-[#4B7BF5] px-6 py-2 rounded-lg text-white hover:bg-[#3D63CC] transition-all duration-300 flex items-center gap-2">
               Dashboard <FaArrowRight className="text-sm" />
             </Link>
           ) : (
             <>
-              <Link to="/login" className="text-gray-300 hover:text-white transition-colors">Sign in</Link>
+              <Link to="/login" className="text-gray-300 hover:text-white transition-colors">Log in</Link>
               <Link to="/register" className="bg-[#4B7BF5] px-6 py-2 rounded-lg text-white hover:bg-[#3D63CC] transition-all duration-300">
                 Get Started
               </Link>

@@ -263,33 +263,36 @@ if(!createduser){
 console.log("Generating tokens...");
     
   // Generate tokens with role included
-  const { accesstoken, refreshtoken } = await generateAccessandrefreshtoken(usersave._id);
+  const { accestoken,refreshtoken } = await generatetokens(usersave._id);
 
   // Set tokens in HTTP-only cookies
-  const options = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-  };
+ console.log(accestoken);
 
   console.log("Register complete - sending response");
     
-  // Return user data + tokens
-  return res.status(201)
-    .cookie("accesstoken", accesstoken, options)
-    .cookie("refreshtoken", refreshtoken, options)
-    .json(new Apiresponse(
-      200, 
-      { 
-        user: {
-          ...createduser.toObject(),
-          role: createduser.role  // Explicitly include role in response
-        }, 
-        accesstoken, 
-        refreshtoken 
-      }, 
-      "User registered successfully"
-    ));
+  const options = {
+    httpOnly: true,
+    secure: true,  // ✅ Always true for production
+    sameSite: "None",  // ✅ Required for cross-origin requests
+    path: "/",
+  };
+  
+  res.cookie("accesstoken", accestoken, options);
+  res.cookie("refreshtoken", refreshtoken, options);
+  
+  return res.status(201).json(new Apiresponse(
+    200,
+    {
+      user: {
+        ...createduser.toObject(),
+        role: createduser.role,  // Explicitly include role in response
+      },
+      accestoken,
+      refreshtoken,
+    },
+    "User registered successfully"
+  ));
+  
 }
 );
 const login=asynchandler(async (req,res)=>{

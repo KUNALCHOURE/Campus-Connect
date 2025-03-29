@@ -1,7 +1,7 @@
 import React from "react";
 import startFrame from '../assets/StartFrame.png'; // Import the image
 import { motion } from "framer-motion";
-
+import logo from "../../public/logo.jpg"
 function Loading() {
   return (
     <motion.div 
@@ -37,7 +37,7 @@ function Loading() {
               opacity: 1
             }}
             transition={{ duration: 1.2, ease: "easeOut" }}
-            src={startFrame}
+            src={logo}
             alt="College Hub"
             className="w-72 h-auto"
           />

@@ -29,8 +29,8 @@ function DiscussionPage() {
   const [groupInfo, setGroupInfo] = useState({
     name: "Competitive Programming",
     description: "A community of competitive programmers sharing resources, discussing problems, and preparing for contests.",
-    members: 156,
-    discussions: 0
+     members:5 ,
+     discussions: 0
   });
   const debounceTimeoutRef = useRef(null);
 
@@ -261,10 +261,10 @@ function DiscussionPage() {
                     className="w-full pl-10 pr-4 py-2 bg-[#151f2a] border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
                   />
                 </div>
-                <button className="flex items-center space-x-2 px-4 py-2 bg-[#151f2a] border border-gray-700 rounded-md hover:bg-[#1a283a]">
+                {/* <button className="flex items-center space-x-2 px-4 py-2 bg-[#151f2a] border border-gray-700 rounded-md hover:bg-[#1a283a]">
                   <FaFilter className="h-4 w-4" />
                   <span>Filter</span>
-                </button>
+                </button> */}
               </div>
 
               {/* Quick Action Buttons */}

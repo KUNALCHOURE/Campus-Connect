@@ -64,7 +64,7 @@ function Header() {
               <span className="gradient-text font-semibold">Campus</span>
               <motion.span 
                 whileHover={{ scale: 1.05 }}
-                className="bg-white text-primary px-2 py-0.5 ml-1 rounded shadow-sm font-bold text-sm"
+                className=" text-primary px-2 py-0.5 ml-1 rounded shadow-sm font-bold text-lg"
               >
                 Connect
               </motion.span>
@@ -108,7 +108,7 @@ function Header() {
         </motion.button>
 
         {/* Notification Bell */}
-        <motion.div
+        {/* <motion.div
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           className="bg-input p-2.5 rounded-full border border-card-border relative"
@@ -117,7 +117,7 @@ function Header() {
           <span className="absolute -top-1 -right-1 bg-secondary-accent text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
             2
           </span>
-        </motion.div>
+        </motion.div> */}
 
         {/* Profile Section with Dropdown */}
         <div className="relative">

@@ -72,14 +72,14 @@ function PostList({ selectedTab, setSelectedTab }) {
         >
           All
         </button>
-        <button
+        {/* <button
           className={`border border-accent/30 text-primary-color py-2 px-6 m-1 rounded-full transition-colors duration-300 hover:bg-accent hover:text-white ${
             selectedTab === "hybrid" ? "bg-accent text-white" : "bg-transparent"
           }`}
           onClick={() => setSelectedTab("hybrid")}
         >
           Recommended
-        </button>
+        </button> */}
       </div>
       {isLoading ? (
         <div className="flex justify-center items-center">
