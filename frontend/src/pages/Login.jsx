@@ -104,7 +104,7 @@ function Login() {
                 onClick={handleRegister} 
                 className="text-accent hover:underline cursor-pointer"
               >
-                Sign up
+                Register
               </span>
             </p>
           </div>

@@ -13,7 +13,7 @@ import ResourcesPage from "./pages/ResourcePage";
 import RecommendationTest from "./pages/RecommendationTest";
 import LandingPage from "./pages/landingpage";
 import ChatBotPage from "./pages/ChatBotPage";
-
+import AuthRedirectRoute from "./components/authredirect";
 function App() {
   const [loading, setLoading] = useState(false);
   const location = useLocation();
@@ -81,8 +81,17 @@ function App() {
         />
 
         {/* ✅ Public Routes */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+
+        <Route path="/login" element={
+          <AuthRedirectRoute>
+            <Login />
+          </AuthRedirectRoute>
+        } />
+        <Route path="/register" element={
+          <AuthRedirectRoute>
+            <Register />
+          </AuthRedirectRoute>
+        } />
       </Routes>
     </>
   );
