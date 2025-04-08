@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { FaPaperPlane, FaRobot, FaUser } from 'react-icons/fa';
-
+import api from '../services/api';
 const ChatBot = () => {
     const [messages, setMessages] = useState([]);
     const [inputMessage, setInputMessage] = useState('');
@@ -26,7 +26,7 @@ const ChatBot = () => {
         setIsLoading(true);
 
         try {
-            const response = await axios.post('http://localhost:3000/api/v1/chat/chat', {
+            const response = await api.post('/chat/chat', {
                 message: userMessage
             });
 

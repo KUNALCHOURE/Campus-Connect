@@ -3,9 +3,7 @@ import { FaGithub, FaHome, FaSignOutAlt, FaBell } from "react-icons/fa";
 import { IoCaretDown, IoSearchOutline } from "react-icons/io5";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "../assets/logo.jpg";
-import profile from "../assets/vhjkl.jpeg";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { useAuth } from "../utils/autcontext";
 
 function Header() {
