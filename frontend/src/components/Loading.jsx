@@ -1,7 +1,7 @@
 import React from "react";
-import startFrame from '../assets/StartFrame.png'; // Import the image
+//import startFrame from '../assets/StartFrame.png'; // Import the image
 import { motion } from "framer-motion";
-import logo from "../../public/logo.jpg"
+import logo from "/logo.jpg"
 function Loading() {
   return (
     <motion.div 
