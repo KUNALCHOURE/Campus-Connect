@@ -1,8 +1,8 @@
 import express from 'express';
 const router=express.Router();
-import  {createResource,getResource} from '../controllers/Resource.controllers';
+import  {createResource,getResources} from '../controllers/Resource.controllers.js';
 import { verifyjwt } from "../middlewares/authmiddleware.js";
-router.get('/',getResource);
+router.get('/',getResources);
 
 router.post('/upload',verifyjwt,createResource);
 

@@ -1,5 +1,5 @@
-import Resource from "../models/Resource.model";
-import { user } from "../models/User.model";
+import Resource from "../models/Resource.model.js";
+import { user } from "../models/User.model.js";
 // Create a new resource
 const createResource = async (req, res) => {
     const { name, description, url, tags } = req.body;
