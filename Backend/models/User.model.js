@@ -21,6 +21,96 @@ const Userschema = new mongoose.Schema({
         type: String,
         default: "",
     },
+    bio: {
+        type: String,
+        default: ""
+    },
+    education: {
+        college: {
+            type: String,
+            default: ""
+        },
+        degree: {
+            type: String,
+            default: ""
+        },
+        branch: {
+            type: String,
+            default: ""
+        },
+        year: {
+            type: String,
+            default: ""
+        },
+        cgpa: {
+            type: String,
+            default: ""
+        }
+    },
+    competitiveLinks: {
+        codeforces: {
+            type: String,
+            default: ""
+        },
+        codechef: {
+            type: String,
+            default: ""
+        },
+        leetcode: {
+            type: String,
+            default: ""
+        },
+        hackerrank: {
+            type: String,
+            default: ""
+        }
+    },
+    ratings: {
+        codeforces: {
+            type: String,
+            default: ""
+        },
+        codechef: {
+            type: String,
+            default: ""
+        },
+        leetcode: {
+            type: String,
+            default: ""
+        },
+        hackerrank: {
+            type: String,
+            default: ""
+        }
+    },
+    socialLinks: {
+        github: {
+            type: String,
+            default: ""
+        },
+        linkedin: {
+            type: String,
+            default: ""
+        },
+        portfolio: {
+            type: String,
+            default: ""
+        }
+    },
+    certifications: [{
+        name: {
+            type: String,
+            required: true
+        },
+        platform: {
+            type: String,
+            required: true
+        },
+        completionDate: {
+            type: String,
+            required: true
+        }
+    }],
     refreshtoken: {
         type: String,
     },

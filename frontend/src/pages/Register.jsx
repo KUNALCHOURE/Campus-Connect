@@ -33,6 +33,16 @@ function Register() {
   const [password, setPassword] = useState("");
   const [selectedTopics, setSelectedTopics] = useState([]);
   const [error, setError] = useState("");
+  const [formData, setFormData] = useState({
+    education: {
+      college: "",
+      degree: "",
+      branch: "",
+      year: "",
+      cgpa: ""
+    },
+    bio: ""
+  });
   const navigate = useNavigate();
 
   const handleTopicChange = (topic) => {
@@ -43,10 +53,31 @@ function Register() {
     }
   };
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    if (name.includes('.')) {
+      const [parent, child] = name.split('.');
+      setFormData(prev => ({
+        ...prev,
+        [parent]: {
+          ...prev[parent],
+          [child]: value
+        }
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
+    console.log(username, password, email, selectedTopics, formData);
+    
     if (!username || !password) {
         setError("Both fields are required.");
         return;
@@ -57,7 +88,9 @@ function Register() {
             email, 
             username, 
             password, 
-            preferences: selectedTopics 
+            preferences: selectedTopics,
+            education: formData.education,
+            bio: formData.bio
         });
 
         console.log("Register API Response:", response.data);
@@ -83,12 +116,12 @@ function Register() {
     <>
       <SimpleHeader />
       <div className="flex items-center justify-center min-h-screen bg-primary pt-16">
-        <div className="bg-secondary p-8 rounded-lg shadow-lg w-[30rem]">
+        <div className="bg-secondary p-8 rounded-lg shadow-lg w-[40rem]">
           <h1 className="text-2xl font-semibold text-accent text-center mb-6">
             Register
           </h1>
           {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="space-y-4">
             <input
               type="text"
               placeholder="Email ID"
@@ -108,10 +141,69 @@ function Register() {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 mb-6 text-primary-color bg-primary-light rounded focus:outline-none focus:ring focus:ring-accent"
+              className="w-full p-3 mb-4 text-primary-color bg-primary-light rounded focus:outline-none focus:ring focus:ring-accent"
             />
+
+            <div className="space-y-4">
+              <h2 className="text-primary-color text-lg font-semibold">Education Details</h2>
+              <input
+                type="text"
+                placeholder="College Name"
+                name="education.college"
+                value={formData.education.college}
+                onChange={handleInputChange}
+                className="w-full p-3 text-primary-color bg-primary-light rounded focus:outline-none focus:ring focus:ring-accent"
+              />
+              <div className="grid grid-cols-2 gap-4">
+                <input
+                  type="text"
+                  placeholder="Degree"
+                  name="education.degree"
+                  value={formData.education.degree}
+                  onChange={handleInputChange}
+                  className="w-full p-3 text-primary-color bg-primary-light rounded focus:outline-none focus:ring focus:ring-accent"
+                />
+                <input
+                  type="text"
+                  placeholder="Branch"
+                  name="education.branch"
+                  value={formData.education.branch}
+                  onChange={handleInputChange}
+                  className="w-full p-3 text-primary-color bg-primary-light rounded focus:outline-none focus:ring focus:ring-accent"
+                />
+                <input
+                  type="text"
+                  placeholder="Year"
+                  name="education.year"
+                  value={formData.education.year}
+                  onChange={handleInputChange}
+                  className="w-full p-3 text-primary-color bg-primary-light rounded focus:outline-none focus:ring focus:ring-accent"
+                />
+                <input
+                  type="text"
+                  placeholder="CGPA"
+                  name="education.cgpa"
+                  value={formData.education.cgpa}
+                  onChange={handleInputChange}
+                  className="w-full p-3 text-primary-color bg-primary-light rounded focus:outline-none focus:ring focus:ring-accent"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h2 className="text-primary-color text-lg font-semibold">Bio</h2>
+              <textarea
+                placeholder="Tell us about yourself..."
+                name="bio"
+                value={formData.bio}
+                onChange={handleInputChange}
+                rows="4"
+                className="w-full p-3 text-primary-color bg-primary-light rounded focus:outline-none focus:ring focus:ring-accent resize-none"
+              />
+            </div>
+
             <div className="mb-4">
-              <h2 className="text-primary-color mb-2">Select Topics (up to 3):</h2>
+              <h2 className="text-primary-color mb-2 text-lg font-semibold">Select Topics (up to 3):</h2>
               <div className="flex flex-row flex-wrap gap-2">
                 {topics.map((topic) => (
                   <button
@@ -125,6 +217,7 @@ function Register() {
                 ))}
               </div>
             </div>
+
             <button
               type="submit"
               className="w-full bg-accent hover:bg-accent-dark text-white font-semibold py-3 rounded focus:outline-none"

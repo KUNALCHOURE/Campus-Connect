@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import coverimage from "../assets/coverimage.jpg";
 import { useAuth } from "../utils/autcontext";
 import api from "../services/api"; // Import API to fetch additional data if needed
@@ -7,6 +8,17 @@ import api from "../services/api"; // Import API to fetch additional data if nee
 function ProfileCard() {
   const { user } = useAuth();
   const [postCount, setPostCount] = useState(0); // State to store the user's post count
+
+  // Debug user object
+  useEffect(() => {
+    if (user) {
+      console.log("User object in ProfileCard:", user);
+      console.log("User ID exists:", user._id !== undefined);
+      console.log("User ID value:", user._id);
+    } else {
+      console.log("User is null or undefined in ProfileCard");
+    }
+  }, [user]);
 
   // Fetch the user's post count (optional, if not provided by backend)
   useEffect(() => {
@@ -178,14 +190,27 @@ function ProfileCard() {
         </motion.div>
 
         {/* Profile Link */}
-        <motion.a
+        <motion.div
           whileHover={{ scale: 1.02, y: -2 }}
           whileTap={{ scale: 0.98 }}
-          href="/profile"
-          className="block w-full text-center mt-5 py-2.5 rounded-lg bg-gradient-primary text-white font-medium text-sm shadow-sm hover:shadow-accent transition-all duration-300"
+          className="block w-full text-center mt-5"
         >
-          View Full Profile
-        </motion.a>
+          {user && user._id ? (
+            <Link 
+              to={`/profile/${user._id}`}
+              className="block w-full py-2.5 rounded-lg bg-gradient-primary text-white font-medium text-sm shadow-sm hover:shadow-accent transition-all duration-300"
+            >
+              View Full Profile
+            </Link>
+          ) : (
+            <Link 
+              to="/profile"
+              className="block w-full py-2.5 rounded-lg bg-gradient-primary text-white font-medium text-sm shadow-sm hover:shadow-accent transition-all duration-300"
+            >
+              View Full Profile
+            </Link>
+          )}
+        </motion.div>
       </motion.div>
     </motion.div>
   );

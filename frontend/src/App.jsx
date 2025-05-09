@@ -9,11 +9,13 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Loading from "./components/Loading";
 import Roadmap from "./pages/Roadmap";
 import DiscussionPage from "./pages/DiscussionPage";
-import ResourcesPage from "./pages/ResourcePage";
+
 import RecommendationTest from "./pages/RecommendationTest";
 import LandingPage from "./pages/landingpage";
 import ChatBotPage from "./pages/ChatBotPage";
 import AuthRedirectRoute from "./components/authredirect";
+import ProfilePage from "./pages/profilepage";
+
 function App() {
   const [loading, setLoading] = useState(false);
   const location = useLocation();
@@ -63,19 +65,30 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/resources"
-          element={
-            <ProtectedRoute>
-              <ResourcesPage />
-            </ProtectedRoute>
-          }
-        />
+       
         <Route
           path="/chatbot"
           element={
             <ProtectedRoute>
               <ChatBotPage />
+            </ProtectedRoute>
+          }
+        />
+        
+        {/* Profile routes - both with and without userId */}
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile/:userId"
+          element={
+            <ProtectedRoute>
+            <ProfilePage />
             </ProtectedRoute>
           }
         />

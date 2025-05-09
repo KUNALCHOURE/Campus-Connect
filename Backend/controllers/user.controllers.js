@@ -233,7 +233,7 @@ const generatetokens=async(userid)=>{
 }
 const register=asynchandler(async(req,res)=>{
 console.log("inside backeend register ")
-  let { username, email, password, preferences } = req.body;
+  let { username, email, password, preferences, education, bio } = req.body;
 
     if (!username || !email || !password) {
       throw new Apierror(400, "please provide all details");
@@ -247,12 +247,20 @@ console.log("inside backeend register ")
         throw new Apierror(400,"User already registered ")
     }
 
-    const usersave =await user.create({
+    const usersave = await user.create({
         username,
         email,
         password,
-        preferences: preferences || []
-    })
+        preferences: preferences || [],
+        education: education || {
+          college: "",
+          degree: "",
+          branch: "",
+          year: "",
+          cgpa: ""
+        },
+        bio: bio || ""
+    });
 
     const createduser = await user.findById(usersave._id).select("-password -profileimage");
 
