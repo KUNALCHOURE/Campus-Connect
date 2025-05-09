@@ -3,7 +3,6 @@ import Header from "../components/Header";
 import PostList from "../components/PostList";
 import ProfileCard from "../components/ProfileCard";
 import QuickLinks from "../components/QuickLinks";
-import TrendingSidebar from "../components/TrendingSidebar.jsx";
 
 const HomePage = () => {
   const [selectedTab, setSelectedTab] = useState("all");
@@ -18,7 +17,6 @@ const HomePage = () => {
         {/* Left Sidebar */}
         <aside className="w-full md:w-1/4 p-4">
           <ProfileCard />
-          <QuickLinks />
         </aside>
 
         <main className="w-full md:w-2/4 p-4">
@@ -28,14 +26,7 @@ const HomePage = () => {
 
         {/* Right Sidebar */}
         <aside className="w-full md:w-1/4 p-4">
-          {(() => {
-            try {
-              return <TrendingSidebar />;
-            } catch (error) {
-              console.error("TrendingSidebar error:", error);
-              return <div className="bg-secondary rounded-lg p-4">Trending section unavailable</div>;
-            }
-          })()}
+          <QuickLinks />
         </aside>
       </div>
     </div>
