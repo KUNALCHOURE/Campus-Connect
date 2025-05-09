@@ -35,22 +35,36 @@ const createDiscussion = asynchandler(async (req, res) => {
 // Get all discussions with pagination and filters
 const getDiscussions = asynchandler(async (req, res) => {
     try {
-        // Fetch all discussions without any filters or pagination
+        const { search, tag } = req.query;
+
+        // Define a filter object
+        const filter = {};
+
+        // If a search term is provided, search in title and content
+        if (search) {
+            const searchRegex = new RegExp(search, 'i'); // Case-insensitive regex
+            filter.$or = [
+                { title: searchRegex },
+                { content: searchRegex }
+            ];
+        }
+
+        // If a tag is provided, filter by tag
+        if (tag) {
+            filter.tags = tag;
+        }
+
         const discussions = await discussion
-            .find() // No query object needed since we're fetching all discussions
-            .populate('createdBy.id', 'username') // Populate the username of the creator
-            .sort({ createdAt: -1 }); // Sort by creation date in descending order
+            .find(filter) // Apply the filter
+            .populate('createdBy.id', 'username')
+            .sort({ createdAt: -1 });
 
-        console.log("Discussions:", discussions); // Log the fetched discussions for debugging
+        const total = await discussion.countDocuments(filter);
 
-        // Count the total number of discussions
-        const total = await discussion.countDocuments();
-
-        // Return the response with discussions and total count
         return res.status(200).json(new Apiresponse(200, {
             discussions,
             total,
-            pages: 1, // Since we're fetching all discussions, there's only 1 "page"
+            pages: 1, // Adjust if paginating
             currentPage: 1
         }, "Discussions fetched successfully"));
     } catch (error) {
