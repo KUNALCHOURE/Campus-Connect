@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import api from "../services/api.js";
 import profile from ".././assets/vhjkl.jpeg";
 import { FaPen, FaTimes } from "react-icons/fa";
-
+import { useAuth } from "../utils/autcontext.jsx";
 function PostInput({ onPostCreated }) {
   const [showModal, setShowModal] = useState(false);
   const [postContent, setPostContent] = useState("");
@@ -10,7 +10,7 @@ function PostInput({ onPostCreated }) {
   const [tags, setTags] = useState("");
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const { user } = useAuth();
   // Debug mounting
   useEffect(() => {
     console.log("PostInput mounted");
@@ -62,7 +62,7 @@ function PostInput({ onPostCreated }) {
     <div className="bg-secondary p-5 rounded-lg shadow-md w-full max-w-lg mx-auto">
       <div className="flex items-center space-x-4 mb-4">
         <img
-          src={profile}
+          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.username || 'User')}&background=random&size=160`}
           alt="Profile"
           className="w-12 h-12 rounded-full border-2 border-accent"
         />
