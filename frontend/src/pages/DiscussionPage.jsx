@@ -16,38 +16,32 @@ function DiscussionPage() {
   const [selectedDiscussion, setSelectedDiscussion] = useState(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [error, setError] = useState(null);
-  const [popularTopics] = useState([
-    "Dynamic Programming",
-    "Graph Algorithms",
-    "Number Theory",
-    "String Algorithms",
-    "Data Structures"
-  ]);
-  const [upcomingContests] = useState([
-    { name: "CodeForces Round #890", platform: "CodeForces", division: "Div 2" }
-  ]);
   const [groupInfo, setGroupInfo] = useState({
     name: "Competitive Programming",
     description: "A community of competitive programmers sharing resources, discussing problems, and preparing for contests.",
-     members:5 ,
-     discussions: 0
+    members: 5,
+    discussions: 0
   });
   const debounceTimeoutRef = useRef(null);
 
   useEffect(() => {
     fetchDiscussions();
-  }, [selectedTag]);
-  const fetchDiscussions = async (searchTerm = "", tag = "") => {
+  }, []);
+
+  const fetchDiscussions = async (searchTerm = "") => {
     try {
       setError(null);
   
-      // Assume the API can handle filters through query parameters
-      const response = await api.get('/discussion', {
-        params: {
-          search: searchTerm,
-          tag: tag
-        }
-      });
+      // Build API request with search parameter
+      let url = '/discussion';
+      const params = {};
+      
+      if (searchTerm) {
+        params.search = searchTerm;
+      }
+  
+      console.log("Fetching discussions with params:", params);
+      const response = await api.get(url, { params });
   
       setDiscussions(response.data.data.discussions);
       setGroupInfo((prev) => ({
@@ -68,16 +62,10 @@ function DiscussionPage() {
       clearTimeout(debounceTimeoutRef.current);
     }
   
-    // Pass both search terms and selected tags to fetch function
+    // Add debounce to prevent too many API calls
     debounceTimeoutRef.current = setTimeout(() => {
-      fetchDiscussions(value, selectedTag);
+      fetchDiscussions(value);
     }, 300);
-  };
-  
-  const handleTagFilter = (tag) => {
-    const updatedTag = tag === selectedTag ? "" : tag;
-    setSelectedTag(updatedTag);
-    fetchDiscussions(search, updatedTag); // Trigger fetch on tag change immediately
   };
 
   const openModal = () => setIsModalOpen(true);
@@ -198,130 +186,96 @@ function DiscussionPage() {
             </div>
         </div>
     );
-}  return (
+}
+
+  return (
     <div className='w-full flex flex-col items-center'>
       <Header />
       <div className="min-h-screen bg-[#06141D] text-gray-200 p-6 w-full">
-        {/* Header with group info and start discussion button */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-white mb-2">
-              {groupInfo.name} Group
-            </h1>
-            <div className="flex items-center space-x-4 text-gray-400">
-              <span className="flex items-center space-x-1">
-                <FaUserFriends className="h-5 w-5" />
-                <span>{groupInfo.members} members</span>
-              </span>
-              <span className="flex items-center space-x-1">
-                <FaCommentAlt className="h-5 w-5" />
-                <span>{groupInfo.discussions} discussions</span>
-              </span>
+        {/* Group Statistics Bar */}
+        <div className="bg-[#0c1c29] rounded-lg p-3 mb-6 flex flex-wrap justify-center md:justify-between gap-4">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2">
+              <div className="bg-blue-500/20 p-2 rounded-full">
+                <FaUserFriends className="h-5 w-5 text-blue-400" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-400">Members</p>
+                <p className="text-lg font-semibold text-white">{groupInfo.members}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="bg-green-500/20 p-2 rounded-full">
+                <FaCommentAlt className="h-5 w-5 text-green-400" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-400">Discussions</p>
+                <p className="text-lg font-semibold text-white">{groupInfo.discussions}</p>
+              </div>
             </div>
           </div>
           <button 
             onClick={openModal}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 mt-4 md:mt-0">
-            Start Discussion
+            className="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors shadow-md flex items-center gap-2">
+            <FaCommentAlt className="h-4 w-4" /> New Discussion
           </button>
         </div>
 
-        {/* Main content area with sidebar and discussions */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Left Sidebar */}
-          <div className="md:col-span-1">
-            {/* About Group */}
-            <div className="bg-[#151f2a] p-4 rounded-lg mb-6">
-              <h2 className="text-xl font-bold mb-3 text-white">About Group</h2>
-              <p className="text-gray-300">{groupInfo.description}</p>
-            </div>
+        {/* Header with group info */}
+        <div className="flex flex-col mb-10 bg-gradient-to-r from-[#0c1c29] to-[#122435] p-6 rounded-lg shadow-md border-l-4 border-blue-500">
+          <h1 className="text-3xl font-bold text-white mb-3">
+            {groupInfo.name} Group
+          </h1>
+          <p className="text-gray-300 max-w-3xl leading-relaxed">
+            {groupInfo.description}
+          </p>
+        </div>
 
-            {/* Popular Topics */}
-            <div className="bg-[#151f2a] p-4 rounded-lg mb-6">
-              <h2 className="text-xl font-bold mb-3 text-white">Popular Topics</h2>
-              <div className="space-y-2">
-                {popularTopics.map((topic, index) => (
-                  <div 
-                    key={index} 
-                    className={`bg-[#1a283a] px-3 py-2 rounded-md cursor-pointer ${
-                      selectedTag === topic ? 'bg-blue-600 text-white' : 'hover:bg-[#1e3148]'
-                    }`}
-                    onClick={() => handleTagFilter(topic)}
-                  >
-                    {topic}
-                  </div>
-                ))}
-              </div>
+        {/* Main content area with full-width discussions */}
+        <div className="w-full">
+          {/* Search Bar */}
+          <div className="mb-8">
+            <div className="relative">
+              <IoSearchOutline className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <input
+                type="text"
+                placeholder="Search discussions..."
+                value={search}
+                onChange={handleSearchChange}
+                className="w-full pl-12 pr-4 py-4 bg-[#0c1c29] border border-[#2a3c4e] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white shadow-md"
+              />
             </div>
-
           </div>
 
-          {/* Main Content Area */}
-          <div className="md:col-span-3">
-            {/* Search and Filter Bar */}
-            <div className="mb-6">
-              <div className="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-4 mb-4">
-                <div className="relative flex-1">
-                  <IoSearchOutline className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                  <input
-                    type="text"
-                    placeholder="Search discussions..."
-                    value={search}
-                    onChange={handleSearchChange}
-                    className="w-full pl-10 pr-4 py-2 bg-[#151f2a] border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
-                  />
-                </div>
-                {/* <button className="flex items-center space-x-2 px-4 py-2 bg-[#151f2a] border border-gray-700 rounded-md hover:bg-[#1a283a]">
-                  <FaFilter className="h-4 w-4" />
-                  <span>Filter</span>
-                </button> */}
-              </div>
-
-              {/* Quick Action Buttons */}
-              {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <button className="flex items-center justify-center space-x-2 p-3 bg-[#151f2a] rounded-lg hover:bg-[#1a283a]">
-                  <span className="text-blue-500">⟨⟩</span>
-                  <span>Share Solution</span>
-                </button>
-                <button className="flex items-center justify-center space-x-2 p-3 bg-[#151f2a] rounded-lg hover:bg-[#1a283a]">
-                  <FaBook className="h-5 w-5 text-green-500" />
-                  <span>Resources</span>
-                </button>
-                <button className="flex items-center justify-center space-x-2 p-3 bg-[#151f2a] rounded-lg hover:bg-[#1a283a]">
-                  <FaClock className="h-5 w-5 text-purple-500" />
-                  <span>Practice Timer</span>
-                </button>
-              </div> */}
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-900/50 border border-red-500 rounded-lg text-red-200 flex items-center">
+              <span className="text-red-400 mr-2">⚠️</span>
+              {error}
             </div>
+          )}
 
-            {/* Error Message */}
-            {error && (
-              <div className="mb-4 p-3 bg-red-900/50 border border-red-500 rounded text-red-200">
-                {error}
+          {/* Discussion Posts */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {discussions.length > 0 ? (
+              discussions.map((discussion) => (
+                <DiscussionCard 
+                  key={discussion._id} 
+                  discussion={discussion} 
+                  onClick={() => openDiscussionDetails(discussion)}
+                />
+              ))
+            ) : (
+              <div className="md:col-span-2 xl:col-span-3 text-center p-12 bg-[#151f2a] rounded-lg shadow-lg border border-[#2a3c4e]">
+                <FaCommentAlt className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+                <p className="text-gray-300 mb-4 text-lg">No discussions found in this group</p>
+                <button 
+                  onClick={openModal}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors shadow-md">
+                  Start a New Discussion
+                </button>
               </div>
             )}
-
-            {/* Discussion Posts */}
-            <div className="space-y-6">
-              {discussions.length > 0 ? (
-                discussions.map((discussion) => (
-                  <DiscussionCard 
-                    key={discussion._id} 
-                    discussion={discussion} 
-                    onClick={() => openDiscussionDetails(discussion)}
-                  />
-                ))
-              ) : (
-                <div className="text-center p-10 bg-[#151f2a] rounded-lg">
-                  <p className="text-gray-400 mb-3">No discussions found</p>
-                  <button 
-                    onClick={openModal}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                    Start a New Discussion
-                  </button>
-                </div>
-              )}
-            </div>
           </div>
         </div>
       </div>
