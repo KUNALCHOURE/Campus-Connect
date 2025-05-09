@@ -12,6 +12,22 @@ function DiscussionList({ discussions, fetchDiscussions }) {
   const [error, setError] = useState({});
   const [likedStatus, setLikedStatus] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredDiscussions, setFilteredDiscussions] = useState([]);
+
+  useEffect(() => {
+    // Filter discussions based on search term
+    if (searchTerm.trim() === '') {
+      setFilteredDiscussions(discussions);
+    } else {
+      const lowercasedSearch = searchTerm.toLowerCase();
+      const filtered = discussions.filter(discussion => 
+        discussion.title.toLowerCase().includes(lowercasedSearch) || 
+        discussion.content.toLowerCase().includes(lowercasedSearch)
+      );
+      setFilteredDiscussions(filtered);
+    }
+  }, [searchTerm, discussions]);
 
   useEffect(() => {
     const checkLikeStatuses = async () => {

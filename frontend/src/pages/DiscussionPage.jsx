@@ -37,37 +37,47 @@ function DiscussionPage() {
   useEffect(() => {
     fetchDiscussions();
   }, [selectedTag]);
-
-  const fetchDiscussions = async () => {
+  const fetchDiscussions = async (searchTerm = "", tag = "") => {
     try {
-        setError(null);
-        const response = await api.get('/discussion');
-        setDiscussions(response.data.data.discussions);
-        setGroupInfo((prev) => ({
-            ...prev,
-            discussions: response.data.data.total || 0
-        }));
+      setError(null);
+  
+      // Assume the API can handle filters through query parameters
+      const response = await api.get('/discussion', {
+        params: {
+          search: searchTerm,
+          tag: tag
+        }
+      });
+  
+      setDiscussions(response.data.data.discussions);
+      setGroupInfo((prev) => ({
+        ...prev,
+        discussions: response.data.data.total || 0
+      }));
     } catch (error) {
-        console.error("Error fetching discussions:", error);
-        setError(error.response?.data?.message || "Failed to fetch discussions.");
+      console.error("Error fetching discussions:", error);
+      setError(error.response?.data?.message || "Failed to fetch discussions.");
     }
-};
-
+  };
+  
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearch(value);
-
+  
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current);
     }
-
+  
+    // Pass both search terms and selected tags to fetch function
     debounceTimeoutRef.current = setTimeout(() => {
       fetchDiscussions(value, selectedTag);
     }, 300);
   };
-
+  
   const handleTagFilter = (tag) => {
-    setSelectedTag(tag === selectedTag ? "" : tag);
+    const updatedTag = tag === selectedTag ? "" : tag;
+    setSelectedTag(updatedTag);
+    fetchDiscussions(search, updatedTag); // Trigger fetch on tag change immediately
   };
 
   const openModal = () => setIsModalOpen(true);
