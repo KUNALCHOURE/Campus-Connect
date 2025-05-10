@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaGithub, FaHome, FaSignOutAlt, FaBell } from "react-icons/fa";
+import { FaGithub, FaHome, FaSignOutAlt, FaBell, FaTrophy } from "react-icons/fa";
 import { IoCaretDown, IoSearchOutline } from "react-icons/io5";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "../assets/logo.jpg";
@@ -85,7 +85,7 @@ function Header() {
           <IoSearchOutline className="absolute left-3 text-text-muted text-lg" />
           <input
             type="text"
-            placeholder="Search for topics, people or resources..."
+            placeholder="Search for people"
             className="w-full pl-10 pr-4 py-2 bg-input border border-card-border rounded-full focus:bg-input/80 focus:border-accent/50 transition-colors"
           />
         </motion.div>
@@ -102,6 +102,18 @@ function Header() {
           <a href="/" className="flex items-center space-x-2">
             <FaHome className="text-sm" />
             <span className="font-medium text-sm">Home</span>
+          </a>
+        </motion.button>
+
+        {/* Leaderboard Button */}
+        <motion.button 
+          className="flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-amber-400 text-white rounded-full px-4 py-2 shadow-sm hover:shadow-amber-400/30"
+          whileHover={{ scale: 1.03, y: -1 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <a href="/leaderboard" className="flex items-center space-x-2">
+            <FaTrophy className="text-sm" />
+            <span className="font-medium text-sm">Leaderboard</span>
           </a>
         </motion.button>
 
@@ -160,6 +172,10 @@ function Header() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                     <span className="text-sm">Profile</span>
+                  </a>
+                  <a href="/leaderboard" className="flex items-center gap-2 px-4 py-2.5 text-text-secondary hover:text-text-primary hover:bg-input/70 transition-colors">
+                    <FaTrophy className="h-4 w-4 text-amber-500" />
+                    <span className="text-sm">Leaderboard</span>
                   </a>
                   <a href="/settings" className="flex items-center gap-2 px-4 py-2.5 text-text-secondary hover:text-text-primary hover:bg-input/70 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -10,15 +10,6 @@ function QuickLinks() {
       </div>
       
       <ul className="p-4 space-y-3">
-        <li>
-          <Link 
-            to="/resources" 
-            className="flex items-center p-3 rounded-lg transition-all duration-300 hover:bg-card group"
-          >
-            <FaBookOpen className="text-accent mr-3 text-lg group-hover:text-secondary-accent transition-colors" />
-            <span className="text-text-secondary group-hover:text-white transition-colors">Resources</span>
-          </Link>
-        </li>
         
         <li>
           <Link 
