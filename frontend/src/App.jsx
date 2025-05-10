@@ -15,6 +15,7 @@ import LandingPage from "./pages/landingpage";
 import ChatBotPage from "./pages/ChatBotPage";
 import AuthRedirectRoute from "./components/authredirect";
 import ProfilePage from "./pages/profilepage";
+import LeaderboardPage from "./pages/LeaderboardPage";
 
 function App() {
   const [loading, setLoading] = useState(false);
@@ -105,6 +106,15 @@ function App() {
             <Register />
           </AuthRedirectRoute>
         } />
+
+        <Route
+          path="/leaderboard"
+          element={
+            <ProtectedRoute>
+              <LeaderboardPage />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </>
   );
