@@ -11,11 +11,11 @@ import Roadmap from "./pages/Roadmap";
 import DiscussionPage from "./pages/DiscussionPage";
 
 import RecommendationTest from "./pages/RecommendationTest";
-import LandingPage from "./pages/landingpage";
+import LandingPage from "./pages/landingpage.jsx";
 import ChatBotPage from "./pages/ChatBotPage";
 import AuthRedirectRoute from "./components/authredirect";
-import ProfilePage from "./pages/profilepage";
-import LeaderboardPage from "./pages/LeaderboardPage";
+import ProfilePage from "./pages/profilepage.jsx";
+import LeaderboardPage from "./pages/LeaderboardPage.jsx";
 
 function App() {
   const [loading, setLoading] = useState(false);

@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import Header from '../components/Header';
+import Header from '../components/Header.jsx';
 import { getSolvedLeaderboard, getContestLeaderboard, syncUsersToLeaderboard, updateAllLeaderboardStats, testScrapers } from '../services/api';
 import { FaTrophy, FaCode, FaStar, FaFilter, FaSync, FaUserPlus, FaChartLine, FaBug } from 'react-icons/fa';
 import { SiLeetcode, SiCodeforces } from 'react-icons/si';
-import { useAuth } from '../utils/autcontext';
+import { useAuth } from '../utils/autcontext.jsx';
 
 const LeaderboardPage = () => {
   const { user } = useAuth();
