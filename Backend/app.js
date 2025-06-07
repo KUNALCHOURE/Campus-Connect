@@ -14,7 +14,7 @@ app.use('/uploads', express.static('uploads')); // Serve uploaded images
 
 
 app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:5174","https://campus-connect-eight-gray.vercel.app","https://papaya-salamander-c2de80.netlify.app"],  
+    origin: ["http://localhost:5173", "http://localhost:5174","https://campus-connect-eight-gray.vercel.app","https://campusconnect3.netlify.app"],  
     credentials: true                 // Allow cookies/tokens
   }));
 
