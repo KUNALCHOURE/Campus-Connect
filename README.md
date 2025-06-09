@@ -112,6 +112,27 @@ campusconnect/
 │       └── app.js
 ```
 
+## 📸 Screenshots
+
+### Landing Page
+
+![Image](https://github.com/user-attachments/assets/2a6365df-7d28-46eb-a328-276a4db59100)
+
+
+*Welcome to Campus Connect - Your college community platform*
+
+
+### Dashboard
+
+*User dashboard with key features and navigation*
+![Landing Page](https://github.com/user-attachments/assets/2e23e39c-0acb-4f60-8db6-9168356a1bb3)
+
+
+### Leaderboard
+
+*Competitive leaderboard showcasing top performers*
+![Leaderboard](screenshots/leaderboard.png)
+
 ## 🤝 Contributing
 
 1. Fork the repository
