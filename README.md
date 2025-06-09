@@ -115,12 +115,13 @@ campusconnect/
 ## 📸 Screenshots
 
 ### Landing Page
-![Landing Page](https://github.com/user-attachments/assets/2e23e39c-0acb-4f60-8db6-9168356a1bb3)
+![Landing page](https://github.com/user-attachments/assets/2a6365df-7d28-46eb-a328-276a4db59100)
 *Welcome to Campus Connect - Your college community platform*
 
 ### Dashboard
 *User dashboard with key features and navigation*
-![Dashboard](https://github.com/user-attachments/assets/2a6365df-7d28-46eb-a328-276a4db59100)
+![Dashboard](https://github.com/user-attachments/assets/2e23e39c-0acb-4f60-8db6-9168356a1bb3)
+
 
 ### Discussion Section
 *Interactive discussion forums for academic and professional topics*
