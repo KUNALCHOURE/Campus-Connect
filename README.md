@@ -116,10 +116,12 @@ campusconnect/
 
 ### Landing Page
 
-![Image](https://github.com/user-attachments/assets/2a6365df-7d28-46eb-a328-276a4db59100)
-
 
 *Welcome to Campus Connect - Your college community platform*
+
+
+![Image](https://github.com/user-attachments/assets/2a6365df-7d28-46eb-a328-276a4db59100)
+
 
 
 ### Dashboard
@@ -131,7 +133,7 @@ campusconnect/
 ### Leaderboard
 
 *Competitive leaderboard showcasing top performers*
-![Leaderboard](screenshots/leaderboard.png)
+![Image](https://github.com/user-attachments/assets/f30f04a9-0895-4aef-933f-fb7409a3030e)
 
 ## 🤝 Contributing
 
