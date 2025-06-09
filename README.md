@@ -115,25 +115,28 @@ campusconnect/
 ## 📸 Screenshots
 
 ### Landing Page
-
-
+![Landing Page](https://github.com/user-attachments/assets/2e23e39c-0acb-4f60-8db6-9168356a1bb3)
 *Welcome to Campus Connect - Your college community platform*
 
-
-![Image](https://github.com/user-attachments/assets/2a6365df-7d28-46eb-a328-276a4db59100)
-
-
-
 ### Dashboard
-
 *User dashboard with key features and navigation*
-![Landing Page](https://github.com/user-attachments/assets/2e23e39c-0acb-4f60-8db6-9168356a1bb3)
+![Dashboard](https://github.com/user-attachments/assets/2a6365df-7d28-46eb-a328-276a4db59100)
 
+### Discussion Section
+*Interactive discussion forums for academic and professional topics*
+![Image](https://github.com/user-attachments/assets/468714a2-ff4a-4b5e-a0c7-c29931b8655e)
+
+### AI Roadmap
+*AI-powered personalized career and learning roadmap*
+![Image](https://github.com/user-attachments/assets/88b50376-1720-471a-96ed-3f6935c0fd56)
+
+### AI Chatbot
+*Intelligent AI assistant for instant guidance and support*
+![Image](https://github.com/user-attachments/assets/0040246b-6145-43b7-b587-8fdb211ec68a)
 
 ### Leaderboard
-
 *Competitive leaderboard showcasing top performers*
-![Image](https://github.com/user-attachments/assets/f30f04a9-0895-4aef-933f-fb7409a3030e)
+![Leaderboard](https://github.com/user-attachments/assets/f30f04a9-0895-4aef-933f-fb7409a3030e)
 
 ## 🤝 Contributing
 
