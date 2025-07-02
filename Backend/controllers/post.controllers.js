@@ -109,7 +109,7 @@ const unlikepost=asynchandler(async(req,res)=>{
 const addcomment=asynchandler(async(req,res)=>{
     console.log("hello form  controller");
      const {postId}=req.params;
-     console.log(postId)
+     console.log("post id:",postId)
      const {text}=req.body;
      console.log("hello 2");
      if (!mongoose.Types.ObjectId.isValid(postId)) {
@@ -122,22 +122,25 @@ const addcomment=asynchandler(async(req,res)=>{
         throw new Apierror(404,"error occured while finding the post");
 
       }
-      console.log(req.user);
-      console.log(req.user.username);
+    //   console.log(req.user);
+    //   console.log(req.user.username);
 
-  const createdby={
+  const createdBy={
 
    id:req.user._id,
    username:req.user.username
   }
       const newcomment={
          text,
-         createdby,
+         createdBy,
       };
 
+     
       await currentpost.comments.push(newcomment);
+   
       await currentpost.save();
-      
+    //   const newpost =await post.findById(postId);
+    //   console.log("this is hte new post",newpost);
       return res.status(200)
       .json(new Apiresponse(200,{},"Comment successfully added"));
 
@@ -147,6 +150,7 @@ const addcomment=asynchandler(async(req,res)=>{
 
 
 const getcomment=asynchandler(async(req,res)=>{
+    console.log("hello from get comment");
     const {postid}=req.params;
 
     if (!mongoose.Types.ObjectId.isValid(postid)) {
@@ -160,9 +164,34 @@ const getcomment=asynchandler(async(req,res)=>{
 
      }
      const result=currentpost.comments;
-
+     console.log("this is the result",result);
      return res.status(200)
      .json(new Apiresponse(200,{result},"Comments successfully sended"));
+
+
+})
+
+const deletecomment=asynchandler(async(req,res)=>{
+    console.log("hello from delete comment");
+    const {postid}=req.params;
+    const {commentid}=req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(postid)) {
+    return new Apierror(400,"Invalid id ");
+    }
+
+     const currentpost=await post.findById(postid);
+
+     if(!currentpost){
+       throw new Apierror(404,"error occured while finding the post");
+
+     }
+    currentpost.comments=currentpost.comments.filter(
+        (comment)=>comment._id.toString()!=commentid.toString()
+    );
+  await currentpost.save();
+     return res.status(200)
+     .json(new Apiresponse(200,{},"Comments successfully sended"));
 
 
 })
@@ -192,4 +221,4 @@ const deletepost = asynchandler(async (req, res) => {
     return res.status(200).json(new Apiresponse(200, {}, "Post deleted successfully"));
 });
 
-export {createpost,getpost,likepost,addcomment,getcomment,unlikepost,deletepost};
+export {createpost,getpost,likepost,addcomment,getcomment,unlikepost,deletepost,deletecomment};
