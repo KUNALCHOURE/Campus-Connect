@@ -94,25 +94,7 @@ function ProfileCard() {
               alt="Profile"
               className="w-24 h-24 rounded-full object-cover border-4 border-secondary shadow-lg"
             />
-            <motion.div
-              className="absolute bottom-0 right-0 bg-accent w-8 h-8 rounded-full flex items-center justify-center border-2 border-secondary"
-              whileHover={{ scale: 1.2, rotate: 15 }}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4 text-white"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                />
-              </svg>
-            </motion.div>
+           
           </div>
         </motion.div>
       </motion.div>

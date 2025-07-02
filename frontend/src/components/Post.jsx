@@ -7,7 +7,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import api from "../services/api";
 import { useAuth } from "../utils/autcontext";
 
-function Post({ postId, avatar, createdBy, title, content, likes, comments: initialComments, createdAt, addCommentToPost, onDelete }) {
+
+function Post({ postId,posts, avatar, createdBy, title, content, likes, comments: initialComments, createdAt, addCommentToPost, onDelete }) {
   const { user } = useAuth();
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(likes);
@@ -15,7 +16,8 @@ function Post({ postId, avatar, createdBy, title, content, likes, comments: init
   const [commentText, setCommentText] = useState("");
   const [submittingComment, setSubmittingComment] = useState(false);
   const [showComments, setShowComments] = useState(false);
-
+  const [commentsLoading, setCommentsLoading] = useState(true);
+  const[isPostCreator,setisPostCreator]=useState(false);
   // Format the created date to a more elegant format
   const formatDate = (dateString) => {
     if (!dateString) return "Unknown date";
@@ -63,6 +65,25 @@ function Post({ postId, avatar, createdBy, title, content, likes, comments: init
     }
   }, [user, postId]);
 
+   useEffect(() => {
+    const getcomments = async () => {
+      setCommentsLoading(true);
+      try {
+        const response = await api.get(`/post/${postId}/getcomment`);
+        if (response.status === 200) {
+          setComments(response.data.data.result);
+        }
+      } catch (error) {
+        console.error("Error fetching comments:", error.response ? error.response.data : error.message);
+      } finally {
+        setCommentsLoading(false);
+      }
+    };
+    if (showComments) {
+      getcomments();
+    }
+  }, [showComments, postId]);
+
   const handleLike = async () => {
     try {
       let res = await api.post("/post/likepost", { postid: postId });
@@ -99,7 +120,7 @@ function Post({ postId, avatar, createdBy, title, content, likes, comments: init
 
     const newComment = {
       text: commentText,
-      createdBy: { username: user.username },
+      createdby: { id: user._id, username: user.username },
       createdAt: new Date().toISOString(),
     };
 
@@ -108,9 +129,14 @@ function Post({ postId, avatar, createdBy, title, content, likes, comments: init
       if (response.status !== 200) {
         throw new Error("Error occurred while commenting on the post");
       }
-
-      setComments((prevComments) => [...prevComments, newComment]);
-      addCommentToPost(postId, newComment);
+      const commentsResponse = await api.get(`/post/${postId}/getcomment`);
+      if (commentsResponse.status === 200) {
+        setComments(commentsResponse.data.data.result);
+      }
+  
+      // setCommentText("");
+      // setComments((prevComments) => [...prevComments, newComment]);
+      // addCommentToPost(postId, newComment);
       setCommentText("");
       setSubmittingComment(false);
     } catch (error) {
@@ -137,17 +163,26 @@ function Post({ postId, avatar, createdBy, title, content, likes, comments: init
   };
 
   // Check if the current user is the post creator
-  const isPostCreator = user && createdBy && user._id === createdBy._id;
+  useEffect(() => {
+    console.log("user id",user._id);
+    console.log("created by ",createdBy)
+    console.log("created by ",createdBy.id._id)
+    setisPostCreator(
+      user &&
+      createdBy &&
+      user._id?.toString() === (createdBy.id._id)?.toString()
+    );
+  }, [user, createdBy,posts]);
 
   return (
     <motion.article
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="bg-secondary rounded-xl shadow-md border border-card-border p-5 mb-6 overflow-hidden"
+      className="bg-secondary rounded-xl shadow-md border border-card-border p-5 mb-6 overflow-hidden  mt-5"
     >
       {/* Post Header */}
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-3 ">
         <motion.div 
           className="relative"
           whileHover={{ scale: 1.05 }}
@@ -263,32 +298,60 @@ function Post({ postId, avatar, createdBy, title, content, likes, comments: init
               </button>
             </form>
 
-            {/* Comments List */}
-            <div className="space-y-4">
-              {comments.map((comment, index) => (
-                <div key={index} className="flex items-start space-x-3">
-                  <img
-                    src={`https://ui-avatars.com/api/?name=${comment.createdBy.username}&background=random`}
-                    alt={`${comment.createdBy.username}'s avatar`}
-                    className="w-8 h-8 rounded-full"
-                  />
-                  <div className="flex-1">
-                    <div className="bg-card rounded-lg p-3">
-                      <p className="text-text-primary text-sm">{comment.text}</p>
-                      <div className="flex items-center text-text-muted text-xs mt-1">
-                        <span>{comment.createdBy.username}</span>
-                        <span className="mx-1">•</span>
-                        <span>{formatCommentDate(comment.createdAt)}</span>
+            {commentsLoading ? (
+              <div className="text-center text-text-muted">Loading comments...</div>
+            ) : (
+              <div className="space-y-4">
+                {comments.map((comment, index) => {
+                  // Check if the current user is the comment creator
+                  const isCommentCreator = user && comment.createdBy && (user._id?.toString() === (comment.createdBy._id || comment.createdBy.id)?.toString());
+                  return (
+                    <div key={index} className="flex items-start space-x-3">
+                      <img
+                        src={`https://ui-avatars.com/api/?name=${comment.createdBy?.username || "Unknown"}&background=random`}
+                        alt={`${comment.createdBy?.username || "Unknown"}'s avatar`}
+                        className="w-8 h-8 rounded-full"
+                      />
+                      <div className="flex-1">
+                        <div className="bg-card rounded-lg p-3">
+                          <p className="text-text-primary text-sm">{comment.text}</p>
+                          <div className="flex items-center text-text-muted text-xs mt-1">
+                            <span>{comment.createdBy?.username || <span className="text-red-500">[Unknown User]</span>}</span>
+                            <span className="mx-1">•</span>
+                            <span>{formatCommentDate(comment.createdAt)}</span>
+                            {isCommentCreator && (
+                              <button
+                                className="ml-2 text-red-500 hover:text-red-700 text-xs font-bold"
+                                title="Delete Comment"
+                                onClick={async () => {
+                                  try {
+                                    await api.post(`/post/${postId}/deletecomment`, { commentid: comment._id });
+                                    // Refresh comments after deletion
+                                    const commentsResponse = await api.get(`/post/${postId}/getcomment`);
+                                    if (commentsResponse.status === 200) {
+                                      setComments(commentsResponse.data.data.result);
+                                    }
+                                  } catch (error) {
+                                    console.error("Error deleting comment:", error.response ? error.response.data : error.message);
+                                  }
+                                }}
+                              >
+                                Delete
+                              </button>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
     </motion.article>
+      
   );
 }
 

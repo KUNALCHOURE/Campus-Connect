@@ -63,26 +63,9 @@ function PostList({ selectedTab, setSelectedTab }) {
   return (
     <div>
       <PostInput onPostCreated={handlePostCreated} />
-      <div className="flex justify-center my-6">
-        <button
-          className={`border border-accent/30 text-primary-color py-2 px-6 m-1 rounded-full transition-colors duration-300 hover:bg-accent hover:text-white ${
-            selectedTab === "all" ? "bg-accent text-white" : "bg-transparent"
-          }`}
-          onClick={() => setSelectedTab("all")}
-        >
-          All
-        </button>
-        {/* <button
-          className={`border border-accent/30 text-primary-color py-2 px-6 m-1 rounded-full transition-colors duration-300 hover:bg-accent hover:text-white ${
-            selectedTab === "hybrid" ? "bg-accent text-white" : "bg-transparent"
-          }`}
-          onClick={() => setSelectedTab("hybrid")}
-        >
-          Recommended
-        </button> */}
-      </div>
+      
       {isLoading ? (
-        <div className="flex justify-center items-center">
+        <div className="flex justify-center items-center mt-10">
           <div className="loader"></div>
         </div>
       ) : errorMessage ? (
@@ -92,6 +75,7 @@ function PostList({ selectedTab, setSelectedTab }) {
           <Post
             key={post._id}
             postId={post._id}
+            posts={post}
             createdBy={post.createdBy}
             title={post.title}
             content={post.content}

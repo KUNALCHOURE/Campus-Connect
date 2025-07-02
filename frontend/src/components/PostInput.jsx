@@ -47,8 +47,9 @@ function PostInput({ onPostCreated }) {
         headers: { "Content-Type": "application/json" },
       });
       console.log("Post successful: ", response.data);
-      onPostCreated(response.data.data);
-      closeModal();
+      window.location.reload();
+      // onPostCreated(response.data.data);
+      // closeModal();
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Failed to create post";
       setError(errorMessage);

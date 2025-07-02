@@ -10,7 +10,6 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-
     // ✅ Check authentication on app start (without localStorage)
     useEffect(() => {
         const checkAuth = async () => {
