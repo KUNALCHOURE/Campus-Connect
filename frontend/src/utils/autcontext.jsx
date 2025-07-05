@@ -1,3 +1,4 @@
+// src/context/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from 'react';
 import authService from '../services/authservice';
 import { toast } from 'react-hot-toast';
@@ -10,20 +11,26 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-    // ✅ Check authentication on app start (without localStorage)
+
+    // ✅ Check authentication using localStorage first to avoid cold backend call
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                const response = await api.get("/user/current-user", { withCredentials: true }); // ✅ Ensure cookies are sent
-                console.log("Auth Check API Response:", response);
-    
-                if (response.data?.data?.userobject) {
-                    console.log(response.data.data.userobject);
-                    setUser(response.data.data.userobject);
+                const userData = localStorage.getItem("user");
+                const isLoggedIn = localStorage.getItem("isLoggedIn");
+
+                if (userData) {
+                    setUser(JSON.parse(userData));
+                } else if (isLoggedIn) {
+                    const response = await api.get("/user/current-user", { withCredentials: true });
+                    if (response.data?.data?.userobject) {
+                        setUser(response.data.data.userobject);
+                        localStorage.setItem("user", JSON.stringify(response.data.data.userobject));
+                    }
                 }
             } catch (error) {
                 console.error("Auth check failed:", error);
-                setUser(null); // ✅ Clear user if session expired
+                setUser(null);
             } finally {
                 setLoading(false);
             }
@@ -31,17 +38,31 @@ export const AuthProvider = ({ children }) => {
         checkAuth();
     }, []);
 
-    
+    // ✅ Optional: Warmup backend (once per tab session)
+    useEffect(() => {
+        const warmup = async () => {
+            const hasPinged = sessionStorage.getItem("pinged");
+            if (!hasPinged) {
+                try {
+                    await api.get("/ping");
+                    sessionStorage.setItem("pinged", "true");
+                } catch (err) {
+                    // Ignore ping failure
+                }
+            }
+        };
+        warmup();
+    }, []);
 
     const login = async (credentials) => {
         try {
             const response = await authService.login(credentials);
-            if (!response || !response.data || !response.data.user) {
+            if (!response?.data?.user) {
                 throw new Error("Invalid response from the server");
             }
-            console.log("Login Response:", response.data);
-
             setUser(response.data.user);
+            localStorage.setItem("user", JSON.stringify(response.data.user));
+            localStorage.setItem("isLoggedIn", "true");
             toast.success('Welcome back!');
             navigate("/home");
         } catch (error) {
@@ -52,17 +73,13 @@ export const AuthProvider = ({ children }) => {
 
     const register = async (userData) => {
         try {
-            console.log("Inside register function in AuthContext", userData);
-            
             const response = await authService.register(userData);
-            console.log("Register Response:", response.data);
-
-            if (!response || !response.data || !response.data.user) {
+            if (!response?.data?.user) {
                 throw new Error("Invalid response from the server");
             }
-
             setUser(response.data.user);
-          
+            localStorage.setItem("user", JSON.stringify(response.data.user));
+            localStorage.setItem("isLoggedIn", "true");
             navigate("/home");
         } catch (error) {
             console.error("Error during registration:", error);
@@ -74,26 +91,22 @@ export const AuthProvider = ({ children }) => {
 
     const logout = async () => {
         try {
-           let res= await authService.logout();
-           console.log(res);
-           if(res.status==200){
-            setUser(null);
-            console.log(user);
-            toast.success('Logged out successfully');
-            
-           }
+            const res = await authService.logout();
+            if (res.status === 200) {
+                localStorage.removeItem("user");
+                localStorage.removeItem("isLoggedIn");
+                setUser(null);
+                toast.success('Logged out successfully');
+                navigate("/login");
+            }
         } catch (error) {
             toast.error('Error logging out');
             throw error;
         }
     };
 
- 
-
     return (
-        <AuthContext.Provider 
-            value={{ user, setUser, login, logout, register, loading, }}
-        >
+        <AuthContext.Provider value={{ user, setUser, login, logout, register, loading }}>
             {!loading && children}
         </AuthContext.Provider>
     );
