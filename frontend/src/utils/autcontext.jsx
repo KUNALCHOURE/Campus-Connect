@@ -92,13 +92,15 @@ export const AuthProvider = ({ children }) => {
     const logout = async () => {
         try {
             const res = await authService.logout();
-            if (res.status === 200) {
+            // console.log(res);
+           //  console.log(res.data.statuscode);
+             if(res.data.statuscode==200){
                 localStorage.removeItem("user");
                 localStorage.removeItem("isLoggedIn");
                 setUser(null);
                 toast.success('Logged out successfully');
                 navigate("/login");
-            }
+             }
         } catch (error) {
             toast.error('Error logging out');
             throw error;
