@@ -6,26 +6,42 @@ import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext(null);
+const SESSION_DURATION = 24 * 60 * 60 * 1000;
+
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-    // ✅ Check authentication using localStorage first to avoid cold backend call
     useEffect(() => {
         const checkAuth = async () => {
             try {
                 const userData = localStorage.getItem("user");
+                const expiry = localStorage.getItem("expiry");
                 const isLoggedIn = localStorage.getItem("isLoggedIn");
 
-                if (userData) {
+                if (userData && expiry) {
+                    const isExpired = Date.now() > Number(expiry);
+                    if (isExpired) {
+                        console.log("Session expired. Logging out.");
+                        localStorage.clear();
+                        setUser(null);
+                        return;
+                    }
                     setUser(JSON.parse(userData));
-                } else if (isLoggedIn) {
+                    return;
+                }
+
+                // Fallback: If no userData but isLoggedIn, fetch from server
+                if (isLoggedIn) {
                     const response = await api.get("/user/current-user", { withCredentials: true });
                     if (response.data?.data?.userobject) {
-                        setUser(response.data.data.userobject);
-                        localStorage.setItem("user", JSON.stringify(response.data.data.userobject));
+                        const userFromBackend = response.data.data.userobject;
+                        setUser(userFromBackend);
+                        localStorage.setItem("user", JSON.stringify(userFromBackend));
+                        const newExpiry = Date.now() + SESSION_DURATION;
+                        localStorage.setItem("expiry", newExpiry.toString());
                     }
                 }
             } catch (error) {
@@ -38,18 +54,12 @@ export const AuthProvider = ({ children }) => {
         checkAuth();
     }, []);
 
-
     useEffect(() => {
-        const warmup = async () => {
+        const warmup = () => {
             const hasPinged = sessionStorage.getItem("pinged");
             if (!hasPinged) {
-                try {
-                     api.get("/use");
-                    console.log("added ")
-                    sessionStorage.setItem("pinged", "true");
-                } catch (err) {
-                    // Ignore ping failure
-                }
+                api.get("/use").catch(() => {});
+                sessionStorage.setItem("pinged", "true");
             }
         };
         warmup();
@@ -61,9 +71,14 @@ export const AuthProvider = ({ children }) => {
             if (!response?.data?.user) {
                 throw new Error("Invalid response from the server");
             }
-            setUser(response.data.user);
-            localStorage.setItem("user", JSON.stringify(response.data.user));
+            const user = response.data.user;
+            const expiry = Date.now() + SESSION_DURATION;
+
+            setUser(user);
+            localStorage.setItem("user", JSON.stringify(user));
             localStorage.setItem("isLoggedIn", "true");
+            localStorage.setItem("expiry", expiry.toString());
+
             toast.success('Welcome back!');
             navigate("/home");
         } catch (error) {
@@ -78,9 +93,14 @@ export const AuthProvider = ({ children }) => {
             if (!response?.data?.user) {
                 throw new Error("Invalid response from the server");
             }
-            setUser(response.data.user);
-            localStorage.setItem("user", JSON.stringify(response.data.user));
+            const user = response.data.user;
+            const expiry = Date.now() + SESSION_DURATION;
+
+            setUser(user);
+            localStorage.setItem("user", JSON.stringify(user));
             localStorage.setItem("isLoggedIn", "true");
+            localStorage.setItem("expiry", expiry.toString());
+
             navigate("/home");
         } catch (error) {
             console.error("Error during registration:", error);
@@ -93,15 +113,12 @@ export const AuthProvider = ({ children }) => {
     const logout = async () => {
         try {
             const res = await authService.logout();
-            // console.log(res);
-           //  console.log(res.data.statuscode);
-             if(res.data.statuscode==200){
-                localStorage.removeItem("user");
-                localStorage.removeItem("isLoggedIn");
+            if (res.data.statuscode === 200) {
+                localStorage.clear();
                 setUser(null);
                 toast.success('Logged out successfully');
                 navigate("/login");
-             }
+            }
         } catch (error) {
             toast.error('Error logging out');
             throw error;
