@@ -38,13 +38,14 @@ export const AuthProvider = ({ children }) => {
         checkAuth();
     }, []);
 
-    // ✅ Optional: Warmup backend (once per tab session)
+
     useEffect(() => {
         const warmup = async () => {
             const hasPinged = sessionStorage.getItem("pinged");
             if (!hasPinged) {
                 try {
-                    await api.get("/ping");
+                     api.get("/use");
+                    console.log("added ")
                     sessionStorage.setItem("pinged", "true");
                 } catch (err) {
                     // Ignore ping failure
