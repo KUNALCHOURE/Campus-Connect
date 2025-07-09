@@ -5,20 +5,15 @@ import { user as User } from '../models/User.model.js';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 
-/**
- * Helper function to extract username from competitive programming URLs
- * @param {string} url The URL to extract username from
- * @param {string} platform The platform (leetcode, codeforces)
- * @returns {string|null} The extracted username or null if invalid
- */
+
 const extractUsernameFromURL = (url, platform) => {
     if (!url) return null;
     
     try {
         // Log the input for debugging
-        console.log(`👉 Extracting ${platform} username from: "${url}"`);
+        console.log(`Extracting ${platform} username from: "${url}"`);
         
-        // If it's already just a username, return it directly
+        
         if (!url.includes('http') && !url.includes('/')) {
             console.log(`✅ Detected plain username: "${url}"`);
             return url.trim();
@@ -91,7 +86,7 @@ const extractUsernameFromURL = (url, platform) => {
  * This function syncs users from the User model and then updates their stats
  */
 const refreshLeaderboardData = async () => {
-    console.log('⭐ Starting leaderboard data refresh...');
+    console.log('Starting leaderboard data refresh...');
     
     try {
         // First, ensure all users with competitive links are in the leaderboard
@@ -870,7 +865,7 @@ export const testScrapers = async (req, res) => {
  */
 export const refreshLeaderboard = async (req, res) => {
     try {
-        console.log('⭐ Manual leaderboard refresh requested');
+        console.log(' Manual leaderboard refresh requested');
         
         // This will refresh all user data
         await refreshLeaderboardData();

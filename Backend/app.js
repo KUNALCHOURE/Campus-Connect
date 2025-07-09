@@ -19,6 +19,8 @@ app.use(cors({
   }));
 
 
+
+
 import userrouter from './routes/user.routes.js';
 import postrouter from './routes/post.routes.js';
 import discussionrouter from './routes/discussion.routes.js';
@@ -35,5 +37,15 @@ app.use("/api/v1/roadmap", roadmapRouter);
 app.use("/api/v1/profile", profileRouter);
 app.use("/api/v1/leaderboard", leaderboardRouter);
 
+app.get("/use", (req, res) => {
+  res.status(200).json({ message: "done" });
+});
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(err.statusCode || 500).json({
+    success: false,
+    message: err.message || "Internal Server Error",
+  });
+});
 
 export default app;

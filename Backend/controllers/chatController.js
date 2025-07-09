@@ -32,19 +32,31 @@ const upload = multer({
 export const chat = async (req, res) => {
     try {
         const userMessage = req.body.message;
+        const history = req.body.history || [];
+
+        // Map frontend history to OpenAI format
+        const formattedHistory = history.map(msg => ({
+            role: msg.sender === 'user' ? 'user' : 'assistant',
+            content: msg.text
+        }));
+
+        // Prepend system prompt
+        const messages = [
+            {
+                role: 'system',
+                content: 'You are a helpful assistant.'
+            },
+            ...formattedHistory
+        ];
+
+        // If no history, add the current user message
+        if (formattedHistory.length === 0) {
+            messages.push({ role: 'user', content: userMessage });
+        }
 
         const completion = await openai.chat.completions.create({
             model: "gpt-3.5-turbo",
-            messages: [
-                {
-                    "role": "system",
-                    "content": "You are a helpful assistant."
-                },
-                {
-                    "role": "user",
-                    "content": userMessage
-                }
-            ],
+            messages: messages,
             max_tokens: 150
         });
 

@@ -1,213 +1,4 @@
-// import { user } from "../models/User.model.js";
-// import Apierror from "../utils/Apierror.js";
-// import Apiresponse from "../utils/Apiresponse.js";
-// import asynchandler from "../utils/asynchandler.js";
-
-// const generateTokens = async (userid) => {
-//   try {
-//     let userinfo = await user.findById(userid).select("-password -refreshtoken");
-
-//     if (!userinfo) {
-//       throw new Apierror(405, "User not found, cannot generate tokens");
-//     }
-
-//     // ✅ Fixed spelling mistake
-//     const accesstoken = await userinfo.generateAcessToken();
-//     const refreshtoken = await userinfo.generateRefreshToken();
-
-//     console.log("Access Token Generated:", accesstoken);
-//     return { accesstoken, refreshtoken };
-//   } catch (e) {
-//     console.error("Error while generating tokens:", e);
-//     throw new Apierror(401, "ERROR while generating tokens");
-//   }
-// };
-
-// const register = asynchandler(async (req, res) => {
-//   console.log("Inside backend register");
-//   let { username, email, password, preferences } = req.body;
-
-//   if (!username || !email || !password) {
-//     throw new Apierror(400, "Please provide all details");
-//   }
-
-//   let existedUser = await user.findOne({
-//     $or: [{ username: username }, { email: email }],
-//   });
-
-//   if (existedUser) {
-//     throw new Apierror(400, "User already registered");
-//   }
-
-//   const usersave = await user.create({
-//     username,
-//     email,
-//     password,
-//     preferences: preferences || [],
-//   });
-
-//   const createdUser = await user.findById(usersave._id).select("-password -profileimage");
-
-//   if (!createdUser) {
-//     throw new Apierror(400, "Error occurred while registering user");
-//   }
-
-//   console.log("Generating tokens...");
-//   const { accesstoken, refreshtoken } = await generateTokens(usersave._id);
-
-//   const options = {
-//     httpOnly: true,
-//     secure: process.env.NODE_ENV === "production", // ✅ Secure only in production
-//     sameSite: "None",
-//     path: "/",
-//   };
-
-//   console.log("Register complete - sending response");
-
-//   return res
-//     .status(201)
-//     .cookie("accesstoken", accesstoken, options)
-//     .cookie("refreshtoken", refreshtoken, options)
-//     .json(
-//       new Apiresponse(
-//         200,
-//         {
-//           user: {
-//             ...createdUser.toObject(),
-//             role: createdUser.role,
-//           },
-//           accesstoken,
-//           refreshtoken,
-//         },
-//         "User registered successfully"
-//       )
-//     );
-// });
-
-// const login = asynchandler(async (req, res) => {
-//   let { username, password } = req.body;
-
-//   if (!(username && password)) {
-//     throw new Apierror(400, "Please add credentials");
-//   }
-
-//   const loggingUser = await user.findOne({ username });
-
-//   if (!loggingUser) {
-//     throw new Apierror(400, "User has not registered yet");
-//   }
-
-//   if (!(await loggingUser.ispasswordcorrect(password))) {
-//     throw new Apierror(400, "Incorrect password");
-//   }
-
-//   console.log("User ID:", loggingUser._id);
-
-//   const { accesstoken, refreshtoken } = await generateTokens(loggingUser._id);
-
-//   const loggedInUser = await user.findById(loggingUser._id).select("-password -refreshtoken");
-
-//   const options = {
-//     httpOnly: true,
-//     secure: process.env.NODE_ENV === "production",
-//     sameSite: "None",
-//     path: "/",
-//   };
-
-//   res.cookie("accesstoken", accesstoken, {
-//     httpOnly: true,
-//     secure: true,  // ✅ Always true for production
-//     sameSite: "None",  // ✅ Required for cross-origin requests
-//     path: "/",
-//   });
-
-//   res.cookie("refreshtoken", refreshtoken, {
-//     httpOnly: true,
-//     secure: true,
-//     sameSite: "None",
-//     path: "/",
-//   });
-
-
-//   return res
-//     .status(200)
-//     .json(new Apiresponse(200, { user: loggedInUser, accesstoken, refreshtoken }, "User logged in successfully"));
-// });
-
-// const logout = asynchandler(async (req, res) => {
-//   let userid = req.user?._id;
-//   console.log("Logging out user ID:", userid);
-
-//   if (!userid) {
-//     return res.status(401).json(new Apiresponse(401, {}, "User not authenticated"));
-//   }
-
-//   // Clear the refresh token in the database
-//   await user.findByIdAndUpdate(userid, { $set: { refreshtoken: undefined } }, { new: true });
-
-//   // Options for clearing cookies
-//   const options = {
-//     httpOnly: true,
-//     secure: process.env.NODE_ENV === "production", // Ensure this matches your environment
-//     sameSite: "None", // Required for cross-origin requests
-//     path: "/", // Ensure this matches the path used when setting the cookies
-//   };
-
-//   // Clear the cookies
-
-//   return res
-//     .status(200)
-//     .clearCookie("accesstoken", options)
-//     .clearCookie("refreshtoken", options)
-//     .json(new Apiresponse(200, {}, "User logged out successfully"));
-// });
-
-// const getuserinfo = async (req, res) => {
-//   let userinfo = req.user;
-
-//   return res.status(200).json(new Apiresponse(200, { userinfo }, "User successfully found"));
-// };
-
-// const changepassword = asynchandler(async (req, res) => {
-//   const { oldpassword, newpassword } = req.body;
-
-//   if (!(oldpassword && newpassword)) {
-//     throw new Apierror(400, "Please provide all credentials");
-//   }
-
-//   let userinfo = await user.findById(req.user?._id);
-//   if (!userinfo) {
-//     throw new Apierror(400, "Problem occurred while finding user");
-//   }
-
-//   if (!(await userinfo.ispasswordcorrect(oldpassword))) {
-//     throw new Apierror(401, "Please enter correct old password");
-//   }
-
-//   userinfo.password = newpassword;
-//   await userinfo.save({ validateBeforeSave: false });
-
-//   return res.status(200).json(new Apiresponse(200, {}, "Password changed successfully"));
-// });
-
-// const getcurrectuser=asynchandler(async(req,res)=>{
-//   let userobject=req.user;
-//       // select method dont work on js object 
-//       // they only work on mongoose query
-//     return res.status(200)
-//     .json(
-//       new Apiresponse(200,
-//       { userobject}
-//       ,"The user is succesfully found ")
-  
-//     )
-  
-     
-//   })
-  
-// export { register, login, logout, getuserinfo, changepassword ,getcurrectuser};
-
-
+import { sanitizeFilter } from "mongoose";
 import {user} from "../models/User.model.js"
 import Apierror from "../utils/Apierror.js";
 import Apiresponse from "../utils/Apiresponse.js"
@@ -433,4 +224,24 @@ const logout=asynchandler(async(req,res)=>{
 
  })
 
-export  {register,login,logout,getuserinfo,changepassword,getcurrectuser};
+ const profilesearch = asynchandler(async (req, res) => {
+  const search = req.query.search;
+  if (!search) {
+    return res.status(400).json(new Apierror(400, "The search query is needed"));
+  }
+
+  
+    console.log(search)
+    const users = await user.find({
+      $or: [
+        { username: { $regex: search, $options: "i" } },
+        { name: { $regex: search, $options: "i" } },
+      ],
+    }).select("_id username name profileimage");
+    console.log(users);
+    return res.json(new Apiresponse(200,{users}, "User search completed"));
+  
+});
+
+
+export  {register,login,logout,getuserinfo,changepassword,getcurrectuser,profilesearch};
