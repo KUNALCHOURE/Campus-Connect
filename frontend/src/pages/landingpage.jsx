@@ -8,7 +8,7 @@ export default function LandingPage() {
   const { user } = useAuth();
   const { scrollYProgress } = useScroll();
   const headerRef = useRef(null);
-  const [activeTestimonial, setActiveTestimonial] = useState(0);
+
 
   // Parallax effect for header
   const headerY = useTransform(scrollYProgress, [0, 1], [0, -100]);
@@ -29,27 +29,6 @@ export default function LandingPage() {
     }
   };
 
-  // Testimonials data
-  const testimonials = [
-    {
-      name: "Sarah Chen",
-      role: "Senior Software Engineer at Google",
-      image: "https://ui-avatars.com/api/?name=Sarah+Chen&background=random",
-      text: "CampusConnect helped me connect with seniors who had cracked Google. Their interview experiences and guidance were invaluable in my preparation."
-    },
-    {
-      name: "Alex Kumar",
-      role: "Full Stack Developer at Microsoft",
-      image: "https://ui-avatars.com/api/?name=Alex+Kumar&background=random",
-      text: "The personalized tech roadmap feature helped me focus on the right skills and projects. I landed my dream job thanks to the structured guidance."
-    },
-    {
-      name: "Priya Patel",
-      role: "Product Manager at Amazon",
-      image: "https://ui-avatars.com/api/?name=Priya+Patel&background=random",
-      text: "The platform's data-driven insights helped me understand what companies were looking for. It made my preparation much more targeted."
-    }
-  ];
 
   // Auto-rotate testimonials
   useEffect(() => {
@@ -153,12 +132,7 @@ export default function LandingPage() {
             >
               Join the Community <FaArrowRight />
             </Link>
-            <Link 
-              to="/features" 
-              className="bg-[#1A2942] px-8 py-4 rounded-lg text-white hover:bg-[#243656] transition-all duration-300 text-lg font-semibold"
-            >
-              Explore Features
-            </Link>
+           
           </motion.div>
         </motion.div>
       </section>
@@ -331,60 +305,7 @@ export default function LandingPage() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-accent/5"></div>
-        <div className="max-w-6xl mx-auto px-4 md:px-8 relative">
-          <motion.h2 
-            className="text-4xl font-bold text-center mb-16"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            Success Stories
-          </motion.h2>
-          <div className="relative h-[400px]">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTestimonial}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5 }}
-                className="bg-white/5 backdrop-blur-sm p-8 rounded-2xl shadow-xl border border-white/10"
-              >
-                <div className="flex items-center gap-4 mb-6">
-                  <img 
-                    src={testimonials[activeTestimonial].image} 
-                    alt={testimonials[activeTestimonial].name}
-                    className="w-16 h-16 rounded-full"
-                  />
-                  <div>
-                    <h3 className="text-xl font-semibold">{testimonials[activeTestimonial].name}</h3>
-                    <p className="text-accent">{testimonials[activeTestimonial].role}</p>
-                  </div>
-                </div>
-                <p className="text-lg text-secondary-text">{testimonials[activeTestimonial].text}</p>
-                <div className="flex gap-1 mt-4">
-                  {[...Array(5)].map((_, i) => (
-                    <FaStar key={i} className="text-yellow-400" />
-                  ))}
-                </div>
-              </motion.div>
-            </AnimatePresence>
-            <div className="flex justify-center gap-2 mt-6">
-              {testimonials.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setActiveTestimonial(index)}
-                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                    index === activeTestimonial ? "bg-accent scale-125" : "bg-accent/30"
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+     
 
       {/* Stats Section */}
       <section className="py-20 relative overflow-hidden">
@@ -452,7 +373,7 @@ export default function LandingPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            © 2024 CampusConnect. All rights reserved.
+            © 2025 CampusConnect. All rights reserved.
           </motion.p>
           <motion.div 
             className="flex justify-center space-x-8"
