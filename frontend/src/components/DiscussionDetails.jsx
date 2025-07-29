@@ -170,7 +170,7 @@ function DiscussionDetails({ discussion, isOpen, onClose, fetchDiscussions }) {
                 <div className="flex justify-between items-center p-6 border-b border-gray-700 sticky top-0 bg-[#151f2a] z-10">
                     <h2 className="text-xl font-semibold text-white">Discussion</h2>
                     <div className="flex items-center space-x-2">
-                        {user && user._id === discussion.createdBy.id.toString() && (
+                        {user && user._id === discussion.createdBy?.id?.toString() && (
                             <>
                                 {isEditing ? (
                                     <>
@@ -223,12 +223,12 @@ function DiscussionDetails({ discussion, isOpen, onClose, fetchDiscussions }) {
                 <div className="flex-1 overflow-y-auto p-6">
                     <div className="flex items-center space-x-4 mb-6">
                         <img
-                            src={`https://ui-avatars.com/api/?name=${discussion.createdBy.username}&background=random`}
-                            alt={discussion.createdBy.username}
+                            src={`https://ui-avatars.com/api/?name=${discussion.createdBy?.username || "Anonymous"}&background=random`}
+                            alt={discussion.createdBy?.username || "Anonymous"}
                             className="h-12 w-12 rounded-full"
                         />
                         <div>
-                            <h3 className="font-semibold text-white text-lg">{discussion.createdBy.username}</h3>
+                            <h3 className="font-semibold text-white text-lg">{discussion.createdBy?.username || "Anonymous"}</h3>
                             <p className="text-sm text-gray-400">
                                 Posted on {formatDate(discussion.createdAt)}
                             </p>
@@ -344,7 +344,7 @@ function DiscussionDetails({ discussion, isOpen, onClose, fetchDiscussions }) {
                                                 <FaUser className="text-gray-300 h-4 w-4" />
                                             </div>
                                             <div>
-                                                <p className="font-medium text-white">{comment.createdBy.username}</p>
+                                                <p className="font-medium text-white">{comment.createdBy?.username || "Anonymous"}</p>
                                                 <p className="text-xs text-gray-400">{formatDate(comment.createdAt)}</p>
                                             </div>
                                         </div>
