@@ -19,19 +19,12 @@ function SimpleHeader() {
   );
 }
 
-const topics = [
-  "Networking", "WebDevelopment", "AppDevelopment", "SoftwareDevelopment",
-  "CompetitiveProgramming", "Internship", "CorporateLife", "Blockchain",
-  "Web3", "MachineLearning", "ArtificialIntelligence", "DataAnalytics",
-  "CloudComputing", "Innovation", "OpenSource"
-];
 
 function Register() {
   let { setUser } = useAuth();
   const [email, setEmailId] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [selectedTopics, setSelectedTopics] = useState([]);
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     education: {
@@ -202,21 +195,7 @@ function Register() {
               />
             </div>
 
-            <div className="mb-4">
-              <h2 className="text-primary-color mb-2 text-lg font-semibold">Select Topics (up to 3):</h2>
-              <div className="flex flex-row flex-wrap gap-2">
-                {topics.map((topic) => (
-                  <button
-                    key={topic}
-                    type="button"
-                    className={`p-2 text-sm rounded ${selectedTopics.includes(topic) ? 'bg-accent' : 'bg-primary-light'} text-white`}
-                    onClick={() => handleTopicChange(topic)}
-                  >
-                    {topic}
-                  </button>
-                ))}
-              </div>
-            </div>
+            
 
             <button
               type="submit"
