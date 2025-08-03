@@ -7,8 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import api from "../services/api";
 import { useAuth } from "../utils/autcontext";
 
-
-function Post({ postId,posts, avatar, createdBy, title, content, likes, comments: initialComments, createdAt, addCommentToPost, onDelete }) {
+function Post({ postId, posts, avatar, createdBy, title, content, likes, comments: initialComments, createdAt, addCommentToPost, onDelete }) {
   const { user } = useAuth();
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(likes);
@@ -17,7 +16,8 @@ function Post({ postId,posts, avatar, createdBy, title, content, likes, comments
   const [submittingComment, setSubmittingComment] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [commentsLoading, setCommentsLoading] = useState(true);
-  const[isPostCreator,setisPostCreator]=useState(false);
+  const [isPostCreator, setisPostCreator] = useState(false);
+
   // Format the created date to a more elegant format
   const formatDate = (dateString) => {
     if (!dateString) return "Unknown date";
@@ -65,7 +65,7 @@ function Post({ postId,posts, avatar, createdBy, title, content, likes, comments
     }
   }, [user, postId]);
 
-   useEffect(() => {
+  useEffect(() => {
     const getcomments = async () => {
       setCommentsLoading(true);
       try {
@@ -134,9 +134,6 @@ function Post({ postId,posts, avatar, createdBy, title, content, likes, comments
         setComments(commentsResponse.data.data.result);
       }
   
-      // setCommentText("");
-      // setComments((prevComments) => [...prevComments, newComment]);
-      // addCommentToPost(postId, newComment);
       setCommentText("");
       setSubmittingComment(false);
     } catch (error) {
@@ -164,110 +161,99 @@ function Post({ postId,posts, avatar, createdBy, title, content, likes, comments
 
   // Check if the current user is the post creator
   useEffect(() => {
-    console.log("user id",user._id);
-    console.log("created by ",createdBy)
-    console.log("created by ",createdBy.id._id)
+    console.log("user id", user._id);
+    console.log("created by ", createdBy)
+    console.log("created by ", createdBy.id._id)
     setisPostCreator(
       user &&
       createdBy &&
       user._id?.toString() === (createdBy.id._id)?.toString()
     );
-  }, [user, createdBy,posts]);
+  }, [user, createdBy, posts]);
 
   return (
     <motion.article
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="bg-secondary rounded-xl shadow-md border border-card-border p-5 mb-6 overflow-hidden  mt-5"
+      transition={{ duration: 0.3 }}
+      className="bg-secondary rounded-2xl shadow-lg border border-card-border p-6 mb-6 overflow-hidden hover:shadow-xl transition-shadow duration-300 mt-8"
+
     >
       {/* Post Header */}
-      <div className="flex items-start gap-3 ">
-        <motion.div 
-          className="relative"
-          whileHover={{ scale: 1.05 }}
-        >
+      <div className="flex items-start gap-4 mb-4">
+        <div className="relative flex-shrink-0">
           <img
             src={avatar || `https://ui-avatars.com/api/?name=${createdBy.username}&background=random`}
             alt={`${createdBy.username}'s avatar`}
-            className="w-12 h-12 rounded-full object-cover border-2 border-accent/30"
+            className="w-14 h-14 rounded-full object-cover border-2 border-accent/20 shadow-md"
           />
-          <motion.div 
-            className="absolute -bottom-1 -right-1 w-5 h-5 bg-accent rounded-full flex items-center justify-center border-2 border-secondary"
-            whileHover={{ scale: 1.2 }}
-          >
-            <span className="text-white text-[10px] font-bold">+</span>
-          </motion.div>
-        </motion.div>
+          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-secondary"></div>
+        </div>
         
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between">
-            <div>
-              <motion.h3 
-                initial={{ x: -10, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.1 }}
-                className="font-semibold text-text-primary"
-              >
+            <div className="flex-1">
+              <h3 className="font-bold text-xl text-text-primary mb-1 truncate">
                 {createdBy.username}
-              </motion.h3>
-              <motion.div 
-                initial={{ x: 10, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.1 }}
-                className="flex items-center text-text-muted text-xs"
-              >
-                <IoTimeOutline className="mr-1" />
+              </h3>
+              <div className="flex items-center text-text-muted text-sm">
+                <IoTimeOutline className="mr-1.5 text-accent" />
                 <span>{formattedDate}</span>
-              </motion.div>
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
-              {/* Delete Button (only visible to the post creator) */}
-              {isPostCreator && (
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+            
+            {isPostCreator && (
+              <div className="flex items-center space-x-2 ml-4">
+                <button
                   onClick={handleDelete}
-                  className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition-colors"
+                  className="text-red-400 hover:text-red-600 p-2 rounded-full hover:bg-red-50 transition-all duration-200 group"
                   title="Delete Post"
                 >
-                  <FaTrash />
-                </motion.button>
-              )}
-              <button className="text-text-muted hover:text-text-primary p-1 rounded-full hover:bg-card transition-colors">
-                <IoEllipsisHorizontal />
-              </button>
-            </div>
+                  <FaTrash className="group-hover:scale-110 transition-transform" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* Post Content */}
-      <div className="mt-4">
-        <h2 className="text-xl font-semibold text-text-primary mb-2">{title}</h2>
-        <p className="text-text-secondary whitespace-pre-wrap">{content}</p>
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-text-primary mb-3 leading-tight">
+          {title}
+        </h2>
+        <p className="text-text-secondary text-lg leading-relaxed whitespace-pre-wrap">
+          {content}
+        </p>
       </div>
 
       {/* Post Actions */}
-      <div className="mt-4 flex items-center space-x-4">
-        <button
-          onClick={isLiked ? handleremovelike : handleLike}
-          className="flex items-center space-x-1 text-text-muted hover:text-accent transition-colors"
-        >
-          {isLiked ? (
-            <AiFillLike className="text-accent" />
-          ) : (
-            <AiOutlineLike />
-          )}
-          <span>{likeCount}</span>
-        </button>
-        <button
-          onClick={() => setShowComments(!showComments)}
-          className="flex items-center space-x-1 text-text-muted hover:text-accent transition-colors"
-        >
-          <FaRegComment />
-          <span>{comments.length}</span>
-        </button>
+      <div className="flex items-center justify-between py-3 px-1 border-t border-card-border">
+        <div className="flex items-center space-x-6">
+          <button
+            onClick={isLiked ? handleremovelike : handleLike}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-all duration-200 ${
+              isLiked 
+                ? 'text-accent bg-accent/10 hover:bg-accent/20' 
+                : 'text-text-muted hover:text-accent hover:bg-accent/10'
+            }`}
+          >
+            {isLiked ? (
+              <AiFillLike className="text-lg" />
+            ) : (
+              <AiOutlineLike className="text-lg" />
+            )}
+            <span className="font-medium">{likeCount}</span>
+          </button>
+          
+          <button
+            onClick={() => setShowComments(!showComments)}
+            className="flex items-center space-x-2 px-4 py-2 rounded-full text-text-muted hover:text-accent hover:bg-accent/10 transition-all duration-200"
+          >
+            <FaRegComment className="text-lg" />
+            <span className="font-medium">{comments.length}</span>
+          </button>
+        </div>
       </div>
 
       {/* Comments Section */}
@@ -277,69 +263,86 @@ function Post({ postId,posts, avatar, createdBy, title, content, likes, comments
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="mt-4 border-t border-card-border pt-4"
+            transition={{ duration: 0.3 }}
+            className="border-t border-card-border pt-4 mt-4"
           >
             {/* Comment Input */}
-            <form onSubmit={handleCommentSubmit} className="flex items-center space-x-2 mb-4">
-              <input
-                type="text"
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                placeholder="Write a comment..."
-                className="flex-1 bg-card border border-card-border rounded-full px-4 py-2 text-text-primary focus:outline-none focus:border-accent"
-                disabled={submittingComment}
+            <form onSubmit={handleCommentSubmit} className="flex items-center space-x-3 mb-6">
+              <img
+                src={`https://ui-avatars.com/api/?name=${user?.username || 'User'}&background=random`}
+                alt="Your avatar"
+                className="w-10 h-10 rounded-full flex-shrink-0"
               />
-              <button
-                type="submit"
-                disabled={submittingComment || !commentText.trim()}
-                className="text-accent hover:text-accent-light transition-colors"
-              >
-                <IoSend />
-              </button>
+              <div className="flex-1 relative">
+                <input
+                  type="text"
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  placeholder="Write a comment..."
+                  className="w-full bg-card border border-card-border rounded-full px-4 py-3 pr-12 text-text-primary focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all duration-200"
+                  disabled={submittingComment}
+                />
+                <button
+                  type="submit"
+                  disabled={submittingComment || !commentText.trim()}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-accent hover:text-accent-light disabled:text-text-muted disabled:cursor-not-allowed p-2 rounded-full hover:bg-accent/10 transition-all duration-200"
+                >
+                  <IoSend className="text-lg" />
+                </button>
+              </div>
             </form>
 
+            {/* Comments List */}
             {commentsLoading ? (
-              <div className="text-center text-text-muted">Loading comments...</div>
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
+                <span className="ml-3 text-text-muted">Loading comments...</span>
+              </div>
             ) : (
               <div className="space-y-4">
                 {comments.map((comment, index) => {
-                  // Check if the current user is the comment creator
                   const isCommentCreator = user && comment.createdBy && (user._id?.toString() === (comment.createdBy._id || comment.createdBy.id)?.toString());
                   return (
-                    <div key={index} className="flex items-start space-x-3">
+                    <div key={index} className="flex items-start space-x-3 group">
                       <img
                         src={`https://ui-avatars.com/api/?name=${comment.createdBy?.username || "Unknown"}&background=random`}
                         alt={`${comment.createdBy?.username || "Unknown"}'s avatar`}
-                        className="w-8 h-8 rounded-full"
+                        className="w-9 h-9 rounded-full flex-shrink-0"
                       />
                       <div className="flex-1">
-                        <div className="bg-card rounded-lg p-3">
-                          <p className="text-text-primary text-sm">{comment.text}</p>
-                          <div className="flex items-center text-text-muted text-xs mt-1">
-                            <span>{comment.createdBy?.username || <span className="text-red-500">[Unknown User]</span>}</span>
-                            <span className="mx-1">•</span>
-                            <span>{formatCommentDate(comment.createdAt)}</span>
-                            {isCommentCreator && (
-                              <button
-                                className="ml-2 text-red-500 hover:text-red-700 text-xs font-bold"
-                                title="Delete Comment"
-                                onClick={async () => {
-                                  try {
-                                    await api.post(`/post/${postId}/deletecomment`, { commentid: comment._id });
-                                    // Refresh comments after deletion
-                                    const commentsResponse = await api.get(`/post/${postId}/getcomment`);
-                                    if (commentsResponse.status === 200) {
-                                      setComments(commentsResponse.data.data.result);
+                        <div className="bg-card rounded-2xl p-4 shadow-sm border border-card-border">
+                          <div className="flex items-start justify-between mb-2">
+                            <span className="font-semibold text-text-primary text-sm">
+                              {comment.createdBy?.username || <span className="text-red-500">[Unknown User]</span>}
+                            </span>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-text-muted text-xs">
+                                {formatCommentDate(comment.createdAt)}
+                              </span>
+                              {isCommentCreator && (
+                                <button
+                                  className="text-red-400 hover:text-red-600 text-xs font-medium px-2 py-1 rounded-full hover:bg-red-50 transition-all duration-200 opacity-0 group-hover:opacity-100"
+                                  title="Delete Comment"
+                                  onClick={async () => {
+                                    try {
+                                      await api.post(`/post/${postId}/deletecomment`, { commentid: comment._id });
+                                      const commentsResponse = await api.get(`/post/${postId}/getcomment`);
+                                      if (commentsResponse.status === 200) {
+                                        setComments(commentsResponse.data.data.result);
+                                      }
+                                    } catch (error) {
+                                      console.error("Error deleting comment:", error.response ? error.response.data : error.message);
                                     }
-                                  } catch (error) {
-                                    console.error("Error deleting comment:", error.response ? error.response.data : error.message);
-                                  }
-                                }}
-                              >
-                                Delete
-                              </button>
-                            )}
+                                  }}
+                                >
+                                  Delete
+                                </button>
+                              )}
+                            </div>
                           </div>
+                          <p className="text-text-secondary text-sm leading-relaxed">
+                            {comment.text}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -351,7 +354,6 @@ function Post({ postId,posts, avatar, createdBy, title, content, likes, comments
         )}
       </AnimatePresence>
     </motion.article>
-      
   );
 }
 
