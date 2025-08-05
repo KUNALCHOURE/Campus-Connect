@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import coverimage from "../assets/coverimage.jpg";
 import { useAuth } from "../utils/autcontext";
-import api from "../services/api"; // Import API to fetch additional data if needed
+import api from "../services/api";
 
 function ProfileCard() {
   const { user } = useAuth();
-  const [postCount, setPostCount] = useState(0); // State to store the user's post count
+  const [postCount, setPostCount] = useState(0);
 
-  // Debug user object
   useEffect(() => {
     if (user) {
       console.log("User object in ProfileCard:", user);
@@ -20,13 +17,11 @@ function ProfileCard() {
     }
   }, [user]);
 
-  // Fetch the user's post count (optional, if not provided by backend)
   useEffect(() => {
     const fetchPostCount = async () => {
       try {
         const response = await api.get("/post/getpost");
         const posts = response.data.data;
-        // Filter posts created by the current user
         const userPosts = posts.filter((post) => post.createdBy.id === user._id);
         console.log(userPosts.length);
         setPostCount(userPosts.length);
@@ -40,161 +35,134 @@ function ProfileCard() {
     }
   }, [user]);
 
-  // Format the join date
   const formatJoinDate = (dateString) => {
     if (!dateString) return "Unknown date";
     const date = new Date(dateString);
-    return `Joined ${date.toLocaleDateString("en-US", { month: "long", year: "numeric" })}`;
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
   };
 
-  // Use a fallback if user data is not available
   if (!user) {
-    return <div>Loading profile...</div>;
+    return (
+      <div className="glassmorphism rounded-2xl p-8 text-center border border-[rgba(255,255,255,0.08)]">
+        <div className="animate-pulse space-y-4">
+          <div className="w-24 h-24 bg-secondary/30 rounded-full mx-auto"></div>
+          <div className="space-y-2">
+            <div className="h-4 bg-secondary/30 rounded-lg w-3/4 mx-auto"></div>
+            <div className="h-3 bg-secondary/30 rounded-lg w-1/2 mx-auto"></div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 mt-6">
+            <div className="h-16 bg-secondary/30 rounded-xl"></div>
+            <div className="h-16 bg-secondary/30 rounded-xl"></div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      whileHover={{ y: -5 }}
-      className="glassmorphism rounded-lg overflow-hidden relative max-w-xs mx-auto shadow-card border border-[rgba(255,255,255,0.08)]"
-    >
-      {/* Banner Image */}
-      <motion.div className="relative h-28">
-        <motion.div
-          className="absolute inset-0 overflow-hidden"
-          whileHover={{ scale: 1.05 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-secondary/80 z-10"></div>
-          <img
-            src={coverimage || "https://miro.medium.com/v2/resize:fit:1400/0*Eww7pEGuh5F3K8fm"}
-            alt="Banner"
-            className="w-full h-full object-cover"
-          />
-        </motion.div>
-        
-        {/* Profile Image */}
-        <motion.div 
-          className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 z-20"
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-        >
-          <div className="relative">
-            <motion.img
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 200 }}
-              src={
-                user.profileimage
-                  ? user.profileimage
-                  : `https://ui-avatars.com/api/?name=${user.username}&background=random`
-              }
-              alt="Profile"
-              className="w-24 h-24 rounded-full object-cover border-4 border-secondary shadow-lg"
-            />
-           
+    <div className="glassmorphism rounded-2xl relative max-w-sm mx-auto shadow-card border border-[rgba(255,255,255,0.08)] bg-gradient-to-br from-secondary/5 to-secondary/20">
+      <div className="relative p-8">
+        {/* Profile Section */}
+        <div className="text-center mb-8">
+          <div className="relative mx-auto w-28 h-28 mb-6">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-accent via-accent/50 to-accent p-1">
+              <div className="w-full h-full rounded-full bg-secondary"></div>
+            </div>
+            <div className="absolute inset-1 rounded-full overflow-hidden">
+              <img
+                src={
+                  user.profileimage
+                    ? user.profileimage
+                    : `https://ui-avatars.com/api/?name=${user.username}&background=4f46e5&color=ffffff&size=200`
+                }
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
-        </motion.div>
-      </motion.div>
 
-      {/* Profile Details */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
-        className="pt-16 px-6 pb-6 text-center"
-      >
-        <motion.h2 
-          initial={{ y: -10 }}
-          animate={{ y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="text-xl font-semibold gradient-text"
-        >
-          {user.username}
-        </motion.h2>
-        
-        <motion.p 
-          initial={{ y: -5 }}
-          animate={{ y: 0 }}
-          transition={{ delay: 0.45 }}
-          className="text-sm font-medium text-text-muted mt-1"
-        >
-          @{user.username.toLowerCase()}
-        </motion.p>
-        
-        <motion.div 
-          className="mt-4 px-4 py-3 rounded-lg bg-secondary/30 border border-[rgba(255,255,255,0.03)]"
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.5 }}
-        >
-          <motion.p className="text-sm text-text-secondary leading-relaxed">
-            {user.email}
-            <br />
-            {formatJoinDate(user.createdAt)}
-          </motion.p>
-        </motion.div>
+          <div>
+            <h2 className="text-2xl font-bold gradient-text mb-2">
+              {user.username}
+            </h2>
+            <p className="text-text-muted font-medium mb-1">
+              @{user.username.toLowerCase()}
+            </p>
+            <div className="inline-flex items-center px-3 py-1 rounded-full bg-secondary/30 border border-[rgba(255,255,255,0.05)]">
+              <div className="w-2 h-2 bg-accent rounded-full mr-2 animate-pulse"></div>
+              <span className="text-xs text-text-secondary font-medium">
+                {formatJoinDate(user.createdAt)}
+              </span>
+            </div>
+          </div>
+        </div>
 
-        {/* Stats */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.6 }}
-          className="flex justify-between mt-5 text-center text-sm"
-        >
-          <motion.div 
-            whileHover={{ y: -3, boxShadow: "0 4px 12px rgba(79, 70, 229, 0.15)" }}
-            className="flex-1 mx-1 bg-secondary/40 rounded-lg py-3 px-2 border border-[rgba(255,255,255,0.03)]"
+        {/* Email Section */}
+        <div className="bg-secondary/20 backdrop-blur-sm rounded-xl p-4 mb-6 border border-[rgba(255,255,255,0.05)]">
+          <div className="flex items-center space-x-3">
+            <div className="flex-shrink-0 w-10 h-10 bg-accent/20 rounded-lg flex items-center justify-center">
+              <svg className="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+              </svg>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-text-muted font-medium uppercase tracking-wider mb-1">Email</p>
+              <p className="text-sm text-text-secondary font-semibold truncate">{user.email}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Section */}
+        <div className="grid grid-cols-2 gap-4 mb-8">
+          <div className="relative group hover:scale-[1.05] hover:-translate-y-1 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-accent/5 rounded-xl blur-sm group-hover:blur-none transition-all duration-300"></div>
+            <div className="relative bg-secondary/30 backdrop-blur-sm rounded-xl p-4 text-center border border-[rgba(255,255,255,0.05)]">
+              <div className="text-3xl font-bold text-accent mb-2">
+                {user.likedPosts.length}
+              </div>
+              <div className="text-xs font-semibold text-text-muted uppercase tracking-wider">
+                Likes
+              </div>
+              <div className="absolute top-2 right-2 w-2 h-2 bg-accent/40 rounded-full animate-ping"></div>
+            </div>
+          </div>
+
+          <div className="relative group hover:scale-[1.05] hover:-translate-y-1 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-accent/5 rounded-xl blur-sm group-hover:blur-none transition-all duration-300"></div>
+            <div className="relative bg-secondary/30 backdrop-blur-sm rounded-xl p-4 text-center border border-[rgba(255,255,255,0.05)]">
+              <div className="text-3xl font-bold text-accent mb-2">
+                {postCount}
+              </div>
+              <div className="text-xs font-semibold text-text-muted uppercase tracking-wider">
+                Posts
+              </div>
+              <div className="absolute top-2 right-2 w-2 h-2 bg-accent/40 rounded-full animate-ping delay-300"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Profile Button */}
+        <div className="group relative block w-full hover:scale-[1.02] active:scale-95 transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-primary rounded-xl opacity-0 group-hover:opacity-100 blur transition-all duration-300"></div>
+          <Link
+            to={user && user._id ? `/profile/${user._id}` : "/profile"}
+            className="relative bg-gradient-to from-slate-300 to-slate-500 rounded-xl py-4 px-6 text-center overflow-hidden flex items-center justify-center space-x-2"
           >
-            <motion.p 
-              whileHover={{ scale: 1.1 }} 
-              className="text-lg font-bold text-accent"
-            >
-              {user.likedPosts.length}
-            </motion.p>
-            <p className="text-xs font-medium text-text-muted mt-1">Likes</p>
-          </motion.div>
-          
-          <motion.div 
-            whileHover={{ y: -3, boxShadow: "0 4px 12px rgba(79, 70, 229, 0.15)" }}
-            className="flex-1 mx-1 bg-secondary/40 rounded-lg py-3 px-2 border border-[rgba(255,255,255,0.03)]"
-          >
-            <motion.p 
-              whileHover={{ scale: 1.1 }} 
-              className="text-lg font-bold text-accent"
-            >
-              {postCount}
-            </motion.p>
-            <p className="text-xs font-medium text-text-muted mt-1">Posts</p>
-          </motion.div>
-        </motion.div>
+            <span className="text-white font-bold text-sm">View Full Profile</span>
+            <svg className="w-4 h-4 text-white animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </Link>
+        </div>
+      </div>
 
-        {/* Profile Link */}
-        <motion.div
-          whileHover={{ scale: 1.02, y: -2 }}
-          whileTap={{ scale: 0.98 }}
-          className="block w-full text-center mt-5"
-        >
-          {user && user._id ? (
-            <Link 
-              to={`/profile/${user._id}`}
-              className="block w-full py-2.5 rounded-lg bg-gradient-primary text-white font-medium text-sm shadow-sm hover:shadow-accent transition-all duration-300"
-            >
-              View Full Profile
-            </Link>
-          ) : (
-            <Link 
-              to="/profile"
-              className="block w-full py-2.5 rounded-lg bg-gradient-primary text-white font-medium text-sm shadow-sm hover:shadow-accent transition-all duration-300"
-            >
-              View Full Profile
-            </Link>
-          )}
-        </motion.div>
-      </motion.div>
-    </motion.div>
+      {/* Decorative Dot */}
+      <div className="absolute top-6 right-6 w-3 h-3 bg-accent/30 rounded-full animate-bounce"></div>
+    </div>
   );
 }
 
