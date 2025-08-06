@@ -9,7 +9,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Loading from "./components/Loading";
 import Roadmap from "./pages/Roadmap";
 import DiscussionPage from "./pages/DiscussionPage";
-
+import DiscussionDetailsPage from "./pages/DiscussionDetailsPage.jsx";
 import RecommendationTest from "./pages/RecommendationTest";
 import LandingPage from "./pages/landingpage.jsx";
 import ChatBotPage from "./pages/ChatBotPage";
@@ -20,6 +20,7 @@ import LeaderboardPage from "./pages/LeaderboardPage.jsx";
 function App() {
   const [loading, setLoading] = useState(false);
   const location = useLocation();
+
 
   useEffect(() => {
     setLoading(true);
@@ -59,10 +60,16 @@ function App() {
           }
         />
         <Route
-          path="/discussion"
+        path="/discussion"
+        element={
+       <DiscussionPage/>
+        }
+       />
+        <Route
+          path="/discussion/:id"
           element={
             <ProtectedRoute>
-              <DiscussionPage />
+              <DiscussionDetailsPage />
             </ProtectedRoute>
           }
         />
