@@ -11,7 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
-
+CHATBOT_ISSUES_AND_FIXES
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
