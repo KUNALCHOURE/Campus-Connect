@@ -107,7 +107,13 @@ function Login() {
                 Register
               </span>
             </p>
+            <div className="mt-5">
+              <p className="font-bold">Demo user: demo</p>
+             <p className="font-bold"> Demo Password: dddddddd</p>
+            </div>
           </div>
+
+          
         </div>
       )}
     </>

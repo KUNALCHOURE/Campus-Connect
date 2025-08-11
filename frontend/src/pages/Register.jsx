@@ -69,7 +69,7 @@ function Register() {
     e.preventDefault();
     setError("");
 
-    console.log(username, password, email, selectedTopics, formData);
+    //console.log(username, password, email, selectedTopics, formData);
     
     if (!username || !password) {
         setError("Both fields are required.");
@@ -81,7 +81,7 @@ function Register() {
             email, 
             username, 
             password, 
-            preferences: selectedTopics,
+            // preferences: selectedTopics,
             education: formData.education,
             bio: formData.bio
         });
