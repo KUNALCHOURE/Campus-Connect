@@ -1,5 +1,7 @@
-import OpenAI from 'openai';
+//import OpenAI from 'openai';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import multer from 'multer';
+import Groq from "groq-sdk";
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -12,8 +14,16 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Configure OpenAI with explicit API key
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY
+// const openai = new OpenAI({
+//     apiKey: process.env.OPENAI_API_KEY
+// });
+
+
+//const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+
+const groq = new Groq({
+  apiKey: process.env.GROK_API_KEY
 });
 
 // Configure Multer for file uploads
@@ -41,26 +51,70 @@ export const chat = async (req, res) => {
         }));
 
         // Prepend system prompt
-        const messages = [
-            {
-                role: 'system',
-                content: 'You are a helpful assistant.'
-            },
-            ...formattedHistory
-        ];
+        // const messages = [
+        //     {
+        //         role: 'system',
+        //         content: 'You are a helpful assistant.'
+        //     },
+        //     ...formattedHistory
+        // ];
 
+
+    const messages = [
+      {
+        role: "system",
+        content: "You are a helpful assistant."
+      },
+      ...formattedHistory,
+      {
+        role: "user",
+        content: userMessage
+      }
+    ];
+
+
+
+
+
+
+        //      const prompt = `
+        // You are a helpful assistant.
+
+        // Conversation History:
+        // ${formattedHistory}
+
+        // User: ${userMessage}
+        // `;
         // If no history, add the current user message
-        if (formattedHistory.length === 0) {
-            messages.push({ role: 'user', content: userMessage });
-        }
+        // if (formattedHistory.length === 0) {
+        //     messages.push({ role: 'user', content: userMessage });
+        // }
 
-        const completion = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo",
-            messages: messages,
-            max_tokens: 150
-        });
+        // const completion = await openai.chat.completions.create({
+        //     model: "gpt-3.5-turbo",
+        //     messages: messages,
+        //     max_tokens: 150
+        // });
 
-        const botResponse = completion.choices[0].message.content;
+//         const model = genAI.getGenerativeModel({
+// model: "gemini-2.0-flash"
+// });
+
+
+//const result = await model.generateContent(messages.map(m => m.content).join("\n"));
+//const result = await model.generateContent(prompt);
+
+ const completion = await groq.chat.completions.create({
+     model: "llama-3.3-70b-versatile",
+      messages: messages,
+      max_tokens: 200
+    });
+
+
+
+//const botResponse = result.response.text();
+
+const botResponse = completion.choices[0].message.content;
 
         res.json({
             response: botResponse
