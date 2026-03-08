@@ -4,7 +4,7 @@ import { CodeforcesProblemTracker, CodeforcesRatingTracker } from '../scraper/co
 import { user as User } from '../models/User.model.js';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
-
+import Groq from "groq-sdk";
 
 const extractUsernameFromURL = (url, platform) => {
     if (!url) return null;

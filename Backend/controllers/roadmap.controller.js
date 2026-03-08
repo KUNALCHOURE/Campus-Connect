@@ -1,7 +1,10 @@
 import OpenAI from 'openai';
-
+import Groq from "groq-sdk";
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
+});
+const groq = new Groq({
+    apiKey: process.env.GROK_API_KEY
 });
 
 export const generateRoadmap = async (req, res) => {
@@ -35,20 +38,30 @@ export const generateRoadmap = async (req, res) => {
         
         Provide only the JSON array, no additional text.`;
 
-        const completion = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo",
-            messages: [
-                {
-                    role: "system",
-                    content: "You are an AI roadmap generator. Always respond with valid JSON arrays containing roadmap data."
-                },
-                {
-                    role: "user",
-                    content: prompt
-                }
-            ],
-            temperature: 0.7
-        });
+        // const completion = await openai.chat.completions.create({
+        //     model: "gpt-3.5-turbo",
+        //     messages: [
+        //         {
+        //             role: "system",
+        //             content: "You are an AI roadmap generator. Always respond with valid JSON arrays containing roadmap data."
+        //         },
+        //         {
+        //             role: "user",
+        //             content: prompt
+        //         }
+        //     ],
+        //     temperature: 0.7
+        // });
+
+            const completion = await groq.chat.completions.create({
+                model: "llama-3.3-70b-versatile",
+                messages: [
+                    {   role: "system", content: "You are an AI roadmap generator. Always respond with valid JSON arrays containing roadmap data."},
+                    {   role: "user", content: prompt }
+                ],
+                temperature: 0.7,
+                // max_tokens: 500
+            });
 
         if (completion.choices && completion.choices.length > 0) {
             const content = completion.choices[0].message.content;
